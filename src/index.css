@@ -1,0 +1,66 @@
+@import './styles/Charts.css';
+
+:root {
+  /* Colors - Based on the mockup requirement: Cyan Sidebar + Dark Shelf + Light Content */
+  --bg-main: #f5f8fa;
+  --bg-sidebar: #22d3ee; /* Bright Cyan (Sky 400ish) from mockup */
+  --bg-sidebar-active: #012a4a; /* Dark Navy for active/hover */
+  --bg-card: #ffffff;
+  --bg-card-header: #fafbfc;
+  
+  --primary: #0284c7;
+  --secondary: #64748b;
+  
+  --text-main: #333333;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --text-sidebar: #ffffff;
+  
+  --border: #e8e8e8;
+  --border-light: #f1f5f9;
+  
+  --status-positive: #10b981;
+  --status-negative: #ef4444;
+  --status-warning: #f59e0b;
+  --status-info: #3b82f6;
+
+  /* Chart Colors Matching Image */
+  --chart-teal: #78d2c0;
+  --chart-blue: #4cb4e7;
+  --chart-orange: #f2a654;
+  --chart-green: #a4ce7e;
+  --chart-red: #f46a6a;
+  --chart-yellow: #f1b44c;
+
+  /* Spacing & Sizes */
+  --sidebar-width-collapsed: 68px;
+  --sidebar-width-expanded: 240px;
+  --sidebar-width: var(--sidebar-width-collapsed);
+  --header-height: 52px;
+  --radius: 4px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

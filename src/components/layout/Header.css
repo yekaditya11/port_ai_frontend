@@ -1,0 +1,141 @@
+.header {
+  height: var(--header-height);
+  background-color: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+.header-left {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center;
+  align-items: flex-start !important;
+  gap: 2px;
+  height: 100%;
+}
+
+.breadcrumbs {
+  display: block !important;
+  width: 100%;
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0 !important;
+  line-height: normal;
+}
+
+.breadcrumb-sep {
+  margin: 0 4px;
+  opacity: 0.5;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.breadcrumbs .current {
+  color: #94a3b8;
+  display: inline-block;
+}
+
+.page-title {
+  display: block !important;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 800;
+  color: #1a202c;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.icon-btn {
+  color: var(--secondary);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.icon-btn:hover {
+  background-color: var(--border-light);
+  color: var(--primary);
+}
+
+.badge-container .badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 10px;
+  border: 2px solid #fff;
+  min-width: 14px;
+  text-align: center;
+}
+
+.btn-label {
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+  border: 1px solid #e2e8f0;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+  margin-left: 8px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.user-dropdown-icon {
+  color: var(--text-muted);
+}

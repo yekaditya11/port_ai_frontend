@@ -1,0 +1,27 @@
+.chart-card {
+  background-color: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chart-header {
+  padding: 12px 16px;
+  background-color: #fafbfc;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+}
+
+.chart-content {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
