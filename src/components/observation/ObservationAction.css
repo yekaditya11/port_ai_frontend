@@ -1,0 +1,225 @@
+.obs-action-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 16px 24px;
+}
+
+.obs-action-header {
+  margin-bottom: 20px;
+}
+
+.obs-action-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-top: 4px;
+}
+
+/* Filter Section */
+.obs-action-filter-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.obs-action-filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.obs-action-filter-box {
+  flex: 1;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.obs-action-filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.obs-action-filter-val {
+  font-size: 13px;
+  color: #64748b;
+  appearance: none;
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.obs-action-filter-arrow {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.obs-action-filter-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.obs-action-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obs-action-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.obs-action-btn-search {
+  background-color: #0ea5e9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 4px;
+  border: none;
+  padding: 0 32px;
+  height: 44px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.obs-action-clear-link {
+  font-size: 13px;
+  color: #0ea5e9;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+/* List Controls */
+.obs-action-list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.obs-action-list-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.obs-action-list-icons {
+  display: flex;
+  gap: 10px;
+  color: #94a3b8;
+}
+
+/* Scrollable Table */
+.obs-action-table-wrapper {
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  overflow-x: auto; /* Horizontal scroll */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.obs-action-table {
+  width: 100%;
+  min-width: 1400px; /* Force scroll for 14 columns */
+  border-collapse: collapse;
+}
+
+.obs-action-table th {
+  background-color: #e2e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+  border-right: 1px solid #cbd5e1;
+}
+
+.obs-action-table th:last-child {
+  border-right: none;
+}
+
+.obs-action-table td {
+  padding: 10px 12px;
+  font-size: 11px;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.obs-action-table tr:last-child td {
+  border-bottom: none;
+}
+
+.obs-action-table td.link {
+  color: #0ea5e9;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.obs-action-table td.link:hover {
+  text-decoration: underline;
+}
+
+/* Icon colors */
+.obs-action-icon-blue { color: #0ea5e9; }
+.obs-action-icon-grey { color: #94a3b8; }
+
+/* Load More */
+.obs-action-load-more {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.obs-action-load-more:hover {
+  background-color: #f8fafc;
+}
+
+/* Custom Scrollbar */
+.obs-action-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.obs-action-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.obs-action-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.obs-action-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

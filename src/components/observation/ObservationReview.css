@@ -1,0 +1,369 @@
+.obs-review-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.obs-review-header {
+  margin-bottom: 24px;
+}
+
+.obs-review-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-top: 4px;
+}
+
+/* Toolbar Filter Grid */
+.obs-review-filter-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.obs-review-filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.obs-review-filter-row.row-last {
+  margin-top: 4px;
+}
+
+.obs-review-filter-box {
+  flex: 1;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.obs-review-filter-box-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.obs-review-filter-box-val {
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  appearance: none;
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.obs-review-calendar-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  margin-right: 20px;
+}
+
+.obs-review-filter-box-arrow {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.obs-review-filter-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.obs-review-search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.obs-review-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.obs-review-btn-search {
+  background-color: #0ea5e9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 4px;
+  border: none;
+  padding: 0 32px;
+  height: 44px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.obs-review-btn-search:hover {
+  background-color: #0284c7;
+}
+
+.obs-review-clear-link {
+  font-size: 13px;
+  color: #0ea5e9;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+/* List Controls */
+.obs-review-list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.obs-review-list-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.obs-review-list-icons {
+  display: flex;
+  gap: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+/* List Rows */
+.obs-review-row-item {
+  background-color: #fff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.obs-review-row-item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.obs-review-list-row {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.obs-review-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Column Widths (Total 100%) */
+.col-rev-title { flex: 0 0 15%; }
+.col-rev-user { flex: 0 0 15%; }
+.col-rev-icons { flex: 0 0 5%; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.col-rev-date { flex: 0 0 12%; }
+.col-rev-loc { flex: 0 0 18%; }
+.col-rev-cat { flex: 0 0 18%; }
+.col-rev-status { flex: 0 0 5%; }
+.col-rev-timer { flex: 0 0 8%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.col-rev-actions { flex: 0 0 4%; display: flex; justify-content: flex-end; align-items: center; align-self: stretch; }
+
+/* Expanded Panel */
+.obs-review-expanded-panel {
+  background-color: #f0f9ff;
+  border-top: 1px solid #e0f2fe;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.obs-review-details-grid {
+  display: flex;
+  gap: 48px;
+  flex: 1;
+}
+
+.obs-review-details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.obs-review-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.obs-review-detail-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.obs-review-detail-val {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.obs-review-map-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border: 4px solid #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.obs-review-map-img {
+  height: 80px;
+  width: auto;
+  display: block;
+}
+
+/* Micro Typography */
+.obs-review-row-bold {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+}
+
+.obs-review-row-sub {
+  font-size: 10px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.obs-review-link {
+  color: #0ea5e9;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.obs-review-link:hover {
+  text-decoration: underline;
+}
+
+.obs-review-icon-orange {
+  color: #f59e0b;
+}
+
+.obs-review-icon-grey {
+  color: #94a3b8;
+}
+
+/* Calendar Popover */
+.obs-review-calendar-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 500;
+  display: flex;
+  padding: 16px;
+}
+
+.obs-review-cal-month {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+.obs-review-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.obs-review-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.obs-review-cal-day-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.obs-review-cal-day {
+  font-size: 12px;
+  color: #1e293b;
+  font-weight: 600;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.obs-review-cal-day:hover {
+  background: #f1f5f9;
+}
+
+.obs-review-cal-day.active {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.obs-review-icon-btn {
+  cursor: pointer;
+  color: #475569;
+}
+
+/* Load More */
+.obs-review-load-more {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  margin-top: 10px;
+}

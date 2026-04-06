@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = ({ onToggleShelf, isShelfOpen }) => {
+const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
   const menuItems = [
     { icon: <Eye size={20} />, label: 'Observation' },
     { icon: <FileText size={20} />, label: 'Incident Management', active: true },
@@ -29,23 +29,23 @@ const Sidebar = ({ onToggleShelf, isShelfOpen }) => {
             key={index} 
             className={`nav-item ${item.active ? 'active' : ''}`}
             onMouseEnter={(e) => {
-              if (item.label === 'Incident Management') {
+              if (item.label === 'Incident Management' || item.label === 'Observation') {
                 const rect = e.currentTarget.getBoundingClientRect();
-                onToggleShelf(true, rect.top);
+                onToggleShelf(true, rect.top, item.label);
               }
             }}
             onClick={(e) => {
-              if (item.label === 'Incident Management') {
+              if (item.label === 'Incident Management' || item.label === 'Observation') {
                 const rect = e.currentTarget.getBoundingClientRect();
-                onToggleShelf(true, rect.top);
+                onToggleShelf(true, rect.top, item.label);
               }
             }}
           >
             <span className="nav-icon">{item.icon}</span>
             <span className="nav-label">{item.label}</span>
-            {item.label === 'Incident Management' && (
+            {(item.label === 'Incident Management' || item.label === 'Observation') && (
               <span className="nav-chevron">
-                {isShelfOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                {isShelfOpen && activeMenu === item.label ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
               </span>
             )}
           </button>

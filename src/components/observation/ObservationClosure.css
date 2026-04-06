@@ -1,0 +1,329 @@
+.obs-closure-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.obs-closure-header {
+  margin-bottom: 24px;
+}
+
+.obs-closure-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-top: 4px;
+}
+
+/* Toolbar Filter Grid */
+.obs-closure-filter-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.obs-closure-filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.obs-closure-filter-row.row-last {
+  margin-top: 4px;
+}
+
+.obs-closure-filter-box {
+  flex: 1;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.obs-closure-filter-box-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.obs-closure-filter-box-val {
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  appearance: none;
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.obs-closure-calendar-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  margin-right: 20px;
+}
+
+.obs-closure-filter-box-arrow {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.obs-closure-filter-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.obs-closure-search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.obs-closure-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.obs-closure-btn-search {
+  background-color: #0ea5e9;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 4px;
+  border: none;
+  padding: 0 32px;
+  height: 44px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.obs-closure-btn-search:hover {
+  background-color: #0284c7;
+}
+
+.obs-closure-clear-link {
+  font-size: 13px;
+  color: #0ea5e9;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+/* List Controls */
+.obs-closure-list-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.obs-closure-list-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.obs-closure-list-icons {
+  display: flex;
+  gap: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+/* Table Layout */
+.obs-closure-table-header {
+  display: flex;
+  align-items: center;
+  background-color: #e2e8f0;
+  padding: 10px 16px;
+  border-radius: 4px 4px 0 0;
+  border: 1px solid #cbd5e1;
+  border-bottom: none;
+}
+
+.obs-closure-header-cell {
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.obs-closure-row {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-bottom: none;
+  transition: background-color 0.2s;
+}
+
+.obs-closure-row:last-child {
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 0 0 4px 4px;
+}
+
+.obs-closure-row:hover {
+  background-color: #f1f5f9;
+}
+
+.obs-closure-cell {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+}
+
+.obs-closure-cell.link {
+  color: #0ea5e9;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.obs-closure-cell.link:hover {
+  text-decoration: underline;
+}
+
+.obs-closure-cell.bold {
+  color: #1e293b;
+}
+
+/* Column Widths (10 columns) */
+.col-id { flex: 0 0 10%; }
+.col-group { flex: 0 0 12%; }
+.col-observer { flex: 0 0 12%; }
+.col-obs-date { flex: 0 0 12%; }
+.col-rec-date { flex: 0 0 12%; }
+.col-loc { flex: 0 0 12%; }
+.col-bu { flex: 0 0 12%; }
+.col-cat { flex: 0 0 10%; }
+.col-status { flex: 0 0 5%; }
+.col-action { flex: 0 0 3%; display: flex; justify-content: flex-end; }
+
+.obs-closure-action-icon {
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.obs-closure-action-icon:hover {
+  color: #0ea5e9;
+}
+
+/* Load More */
+.obs-closure-load-more {
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.obs-closure-load-more:hover {
+  background-color: #f1f5f9;
+}
+
+/* Calendar Popover */
+.obs-closure-calendar-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 500;
+  display: flex;
+  padding: 16px;
+  gap: 0px;
+}
+
+.obs-closure-cal-month {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+.obs-closure-cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.obs-closure-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.obs-closure-cal-day-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.obs-closure-cal-day {
+  font-size: 12px;
+  color: #1e293b;
+  font-weight: 600;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.obs-closure-cal-day:hover {
+  background: #f1f5f9;
+}
+
+.obs-closure-cal-day.active {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.obs-closure-icon-btn {
+  cursor: pointer;
+  color: #475569;
+}

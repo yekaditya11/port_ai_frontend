@@ -1,0 +1,241 @@
+.obs-workflow-container {
+  padding: 0 24px 24px 24px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 120px);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Filters */
+.obs-workflow-filters-container {
+  background: white;
+  padding: 16px;
+  border-radius: 4px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.mt-12 {
+    margin-top: 12px;
+}
+
+.workflow-filter-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 140px;
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.workflow-filter-box label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.select-wrapper, .date-display-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.filter-select {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 13px;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 20px;
+}
+
+.select-chevron, .input-icon {
+  position: absolute;
+  right: 0;
+  pointer-events: none;
+  color: #94a3b8;
+}
+
+.date-text {
+  font-size: 13px;
+  color: #334155;
+}
+
+/* Robust Date Picker Layout */
+.hidden-date-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.date-display-wrapper {
+  z-index: 1;
+}
+
+.filter-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.expand-toggle {
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 8px;
+}
+
+.obs-workflow-search-btn {
+  background-color: #00b8e6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  height: 52px;
+  padding: 0 40px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-spacer {
+    flex: 1;
+}
+
+.clear-search-link {
+    font-size: 13px;
+    color: #00b8e6;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+/* List Info */
+.obs-workflow-list-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.list-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.action-icon {
+    cursor: pointer;
+    color: #94a3b8;
+}
+
+/* Table */
+.obs-workflow-table-container {
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.obs-workflow-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.obs-workflow-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.obs-workflow-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #475569;
+}
+
+.id-cell {
+  color: #00b8e6;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon.orange {
+  color: #f97316;
+}
+
+.status-icon.blue {
+  color: #00b8e6;
+}
+
+.status-icon.green {
+  color: #10b981;
+}
+
+.tat-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.tat-icon {
+    color: #10b981;
+}
+
+.more-cell {
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+/* Footer */
+.obs-workflow-footer {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.load-more-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 12px 64px;
+  border-radius: 4px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  text-transform: uppercase;
+}

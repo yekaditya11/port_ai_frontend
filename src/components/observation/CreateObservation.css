@@ -1,0 +1,275 @@
+.create-obs-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.obs-header {
+  margin-bottom: 24px;
+}
+
+.obs-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+  margin-top: 4px;
+}
+
+/* Grids */
+.obs-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.obs-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Fields */
+.obs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.obs-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.obs-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.obs-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.obs-input, .obs-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #1a202c;
+  background-color: #fff;
+}
+
+.obs-input:disabled, .obs-select:disabled {
+  background-color: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.obs-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+
+.obs-icon-right {
+  position: absolute;
+  right: 12px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Toggles & Checkboxes */
+.obs-toggles-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 24px;
+  margin-top: 8px;
+}
+
+.obs-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.obs-toggle-switch {
+  width: 36px;
+  height: 20px;
+  background-color: #cbd5e1;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.obs-toggle-switch.active {
+  background-color: #3b82f6;
+}
+
+.obs-toggle-knob {
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.obs-toggle-switch.active .obs-toggle-knob {
+  left: 18px;
+}
+
+.obs-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obs-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+/* Textareas */
+.obs-textarea-container {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.obs-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: none;
+  resize: vertical;
+  font-size: 13px;
+  color: #1a202c;
+  border-radius: 4px;
+  outline: none;
+}
+
+.obs-textarea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.obs-translate {
+  font-size: 11px;
+  color: #06b6d4;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.obs-char-count {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Footer Section */
+.obs-confirmation {
+  margin-top: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.obs-confirmation-text {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.obs-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 16px;
+}
+
+/* Buttons */
+.obs-btn {
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: none;
+  min-width: 100px;
+  transition: all 0.2s;
+}
+
+.obs-btn-cancel {
+  background: transparent;
+  color: #475569;
+}
+
+.obs-btn-cancel:hover {
+  background: #f1f5f9;
+}
+
+.obs-btn-secondary {
+  background-color: #cbd5e1;
+  color: #475569;
+}
+
+.obs-btn-secondary:hover {
+  background-color: #94a3b8;
+  color: #fff;
+}
+
+.obs-btn-primary {
+  background-color: #0ea5e9;
+  color: #fff;
+}
+
+.obs-btn-primary:hover {
+  background-color: #0284c7;
+}
+
+/* Map pin custom styling */
+.location-pin-icon {
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1a202c;
+  cursor: pointer;
+}
+
+/* Plus icon styling */
+.add-personnel-icon {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  cursor: pointer;
+}

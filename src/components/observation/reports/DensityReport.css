@@ -1,0 +1,296 @@
+.density-report-container {
+  padding: 20px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 120px);
+  position: relative;
+  padding-bottom: 80px; /* Space for the bottom Action bar */
+}
+
+/* Filters */
+.density-report-filters-container {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  overflow: visible;
+}
+
+.filter-row {
+  display: flex;
+  align-items: stretch;
+  padding: 12px 16px;
+  gap: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.expanded-row {
+  border-bottom: none;
+}
+
+.report-filter-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.report-filter-box label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  appearance: none;
+  font-size: 13px;
+  color: #64748b;
+  outline: none;
+  cursor: pointer;
+  padding-right: 20px;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 0;
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Date Input specialized look */
+.flex-33 {
+  flex: 0 0 calc((100% / 10) * 1.5) !important;
+}
+
+.date-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.date-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #64748b;
+  outline: none;
+  cursor: pointer;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+.date-icon {
+  color: #cbd5e1;
+  pointer-events: none;
+}
+
+/* Removed filter-actions-right wrapper as button is now a direct child of filter-row for better stretching */
+
+.expand-toggle {
+  cursor: pointer;
+  color: #1a202c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0 4px;
+}
+
+.report-search-btn {
+  background-color: #00b8e6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0 32px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px; /* Standardize with Dashboard modules search button */
+}
+
+.report-search-btn:hover {
+  background-color: #0099cc;
+}
+
+.clear-search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding-right: 15px;
+}
+
+.clear-search-link {
+  color: #00b8e6;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.clear-search-link:hover {
+  text-decoration: underline;
+}
+
+/* List Header */
+.density-report-list-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.list-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #94a3b8;
+}
+
+.add-icon-circle {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+/* Table */
+.density-report-table-container {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.density-report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.density-report-table th {
+  background-color: #cbd5e1;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.density-report-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+}
+
+.density-report-table tr:last-child td {
+  border-bottom: none;
+}
+
+.density-report-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.sort-arrows {
+  margin-left: 4px;
+  color: #94a3b8;
+  font-weight: normal;
+  font-size: 10px;
+}
+
+.id-col { width: 25%; }
+.date-col { width: 35%; }
+.area-col { width: 35%; }
+.actions-col { width: 5%; text-align: right; color: #94a3b8; }
+
+.highlight-id {
+  color: #00b8e6;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.text-muted {
+  color: #64748b;
+}
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.load-more-btn {
+  background: transparent;
+  border: none;
+  font-weight: 700;
+  font-size: 12px;
+  color: #475569;
+  cursor: pointer;
+}
+
+/* Bottom Action Bar */
+.report-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding: 0 20px 20px 20px;
+}
+
+.bottom-btn {
+  background-color: #00b8e6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 184, 230, 0.3);
+}
+
+.bottom-btn:hover {
+  background-color: #0099cc;
+}
