@@ -1,16 +1,7 @@
 import React from 'react';
 import './WorkAreaList.css';
 
-const data = [
-  { name: 'Container Berth', count: 19 },
-  { name: 'Bunkering Station', count: 13 },
-  { name: 'Container & General Cargo Berth', count: 10 },
-  { name: 'Bilge Facility', count: 8 },
-  { name: 'Auxiliary facilities', count: 7 },
-  { name: 'Both', count: 27 },
-];
-
-const WorkAreaList = () => {
+const WorkAreaList = ({ data = [] }) => {
   return (
     <div className="work-area-card">
       <div className="work-area-header">
@@ -18,16 +9,21 @@ const WorkAreaList = () => {
       </div>
       <div className="work-area-content">
         <div className="list-items">
-          {data.map((item, index) => (
-            <div key={index} className="work-area-item">
-              <span className="item-name">{item.name}</span>
-              <span className="item-count">{item.count}</span>
-            </div>
-          ))}
+          {data.length > 0 ? (
+            data.map((item, index) => (
+              <div key={index} className="work-area-item">
+                <span className="item-name">{item.name}</span>
+                <span className="item-count">{item.count}</span>
+              </div>
+            ))
+          ) : (
+            <p className="no-data">No work area data</p>
+          )}
         </div>
       </div>
     </div>
   );
 };
+
 
 export default WorkAreaList;

@@ -1,0 +1,111 @@
+.incident-action-container {
+  background-color: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Results Meta */
+.action-meta {
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.results-count-action {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4a5568;
+}
+
+.meta-right-action {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.meta-icon-action {
+  color: #cbd5e0;
+  cursor: pointer;
+}
+
+/* Table */
+.action-table-wrapper {
+  overflow-x: auto; /* ENABLE HORIZONTAL SCROLLING */
+  width: 100%;
+  background-color: #fff;
+  scrollbar-width: thin;
+}
+
+.action-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1600px; /* Ensure space for 13 columns */
+}
+
+.action-table th {
+  background-color: #f8fafc;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.action-table th svg {
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.action-table td {
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+.cell-cyan {
+  color: #22d3ee !important;
+  cursor: pointer;
+}
+
+.status-cell {
+  font-weight: 700 !important;
+}
+
+.status-progress {
+  color: #3b82f6 !important; /* Blue for In-progress */
+}
+
+.status-overdue {
+  color: #ef4444 !important; /* Red for Overdue */
+}
+
+.cell-actions-icon {
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+/* Footer */
+.action-footer {
+  padding: 20px;
+  text-align: center;
+  background-color: #fff;
+}
+
+.load-more-btn-action {
+  background: none;
+  border: none;
+  color: #1e293b;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 8px 16px;
+}

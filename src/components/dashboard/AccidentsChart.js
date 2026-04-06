@@ -2,17 +2,12 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './AccidentsChart.css';
 
-const data = [
-  { name: '0 Days', value: 0 },
-  { name: '5 Days', value: 4 },
-  { name: '10 Days', value: 23 },
-  { name: '15 Days', value: 18 },
-  { name: '20 Days', value: 38 },
-  { name: '25 Days', value: 2 },
-  { name: '30 Days', value: 1 },
-];
+const AccidentsChart = ({ data = [] }) => {
+  const chartData = data.map(item => ({
+    name: item.day_bucket,
+    value: item.count
+  }));
 
-const AccidentsChart = () => {
   return (
     <div className="chart-card line-chart-card">
       <div className="chart-header">
@@ -20,7 +15,7 @@ const AccidentsChart = () => {
       </div>
       <div className="chart-content">
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis 
               dataKey="name" 
@@ -32,7 +27,6 @@ const AccidentsChart = () => {
               axisLine={false} 
               tickLine={false} 
               tick={{ fontSize: 10, fill: '#64748b' }}
-              domain={[0, 40]}
             />
             <Tooltip />
             <Line 
@@ -49,5 +43,6 @@ const AccidentsChart = () => {
     </div>
   );
 };
+
 
 export default AccidentsChart;

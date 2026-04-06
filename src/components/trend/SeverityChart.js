@@ -1,13 +1,14 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const SeverityChart = () => {
-  const data = [
-    { name: '1-Negligible', value: 12, color: '#78d2c0' }, // teal
-    { name: '2-Minor', value: 18, color: '#a4ce7e' }, // green
-    { name: '3-Moderate', value: 34, color: '#f2a654' }, // orange
-    { name: '4-Major', value: 24, color: '#4cb4e7' }, // blue
-    { name: '5-Catastrophic', value: 12, color: '#f46a6a' }, // red
+const SeverityChart = ({ data = [] }) => {
+  // If no data, show default structure with 0s
+  const chartData = data.length > 0 ? data : [
+    { name: '1-Negligible', value: 0, color: '#78d2c0' },
+    { name: '2-Minor', value: 0, color: '#a4ce7e' },
+    { name: '3-Moderate', value: 0, color: '#f2a654' },
+    { name: '4-Major', value: 0, color: '#4cb4e7' },
+    { name: '5-Catastrophic', value: 0, color: '#f46a6a' },
   ];
 
   return (
@@ -17,7 +18,7 @@ const SeverityChart = () => {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data}
+              data={chartData}
               cx="50%"
               cy="50%"
               innerRadius={60}
@@ -25,7 +26,7 @@ const SeverityChart = () => {
               paddingAngle={5}
               dataKey="value"
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>

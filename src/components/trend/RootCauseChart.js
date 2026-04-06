@@ -1,17 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-const RootCauseChart = () => {
-  const data = [
-    { name: 'Impact', value: 24 },
-    { name: 'Equipment', value: 13 },
-    { name: 'Operation', value: 12 },
-    { name: 'Environ', value: 11 },
-    { name: 'Infras', value: 9 },
-    { name: 'Human', value: 8 },
-    { name: 'Others', value: 10 },
-  ];
-
+const RootCauseChart = ({ data = [] }) => {
   return (
     <div className="chart-card">
       <h3 className="chart-title">Incident root Causes</h3>

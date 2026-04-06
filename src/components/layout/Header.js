@@ -38,6 +38,18 @@ const Header = () => {
   } else if (path.includes('/incident/investigation')) {
     breadcrumbLast = "Investigation";
     pageTitle = "Investigation";
+  } else if (path.includes('/incident/root-cause-analysis')) {
+    breadcrumbLast = "Root Cause Analysis";
+    pageTitle = "Root Cause Analysis";
+  } else if (path.includes('/incident/resolution')) {
+    breadcrumbLast = "Resolution";
+    pageTitle = "Resolution";
+  } else if (path.includes('/incident/action')) {
+    breadcrumbLast = "Action";
+    pageTitle = "Action";
+  } else if (path.includes('/incident/workflow')) {
+    breadcrumbLast = "Workflow";
+    pageTitle = "Workflow";
   }
 
   return (

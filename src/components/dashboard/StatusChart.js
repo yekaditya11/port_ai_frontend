@@ -1,18 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-const data = [
-  { name: 'New', value: 32 },
-  { name: 'Review', value: 31 },
-  { name: 'Investigation', value: 7 },
-  { name: 'Overdue', value: 0 },
-  { name: 'Reopened', value: 0 },
-  { name: 'Resolved', value: 2 },
-  { name: 'Rejected', value: 0 },
-  { name: 'Inspection', value: 12 },
-];
-
-const StatusChart = () => {
+const StatusChart = ({ data = [] }) => {
   return (
     <div className="chart-card bar-chart-card">
       <div className="chart-header">
@@ -32,7 +21,6 @@ const StatusChart = () => {
               axisLine={false} 
               tickLine={false} 
               tick={{ fontSize: 10, fill: '#64748b' }}
-              domain={[0, 35]}
             />
             <Tooltip cursor={{ fill: '#f8fafc' }} />
             <Bar dataKey="value" radius={[2, 2, 0, 0]} barSize={24}>
@@ -46,5 +34,6 @@ const StatusChart = () => {
     </div>
   );
 };
+
 
 export default StatusChart;

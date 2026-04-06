@@ -2,18 +2,36 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import './IncidentTypeChart.css';
 
-const data = [
-  { name: 'Injury & Ill Health', value: 400, color: '#a4ce7e' },
-  { name: 'Asset Damage', value: 300, color: '#78d2c0' },
-  { name: 'Environment', value: 300, color: '#f2a654' },
-  { name: 'Environmental Disaster', value: 200, color: '#f46a6a' },
-  { name: 'Accident', value: 150, color: '#4cb4e7' },
-  { name: 'Near Miss', value: 100, color: '#72c472' },
-  { name: 'Unspecified', value: 80, color: '#f9c851' },
-  { name: 'Vehicle Accident', value: 50, color: '#ff8c00' },
-];
+const colors = {
+  'Injury & Ill Health': '#a4ce7e',
+  'Asset Damage': '#78d2c0',
+  'Environment': '#f2a654',
+  'Environmental Disaster': '#f46a6a',
+  'Accident': '#4cb4e7',
+  'Near Miss': '#72c472',
+  'Unspecified': '#f9c851',
+  'Vehicle Accident': '#ff8c00',
+};
 
-const IncidentTypeChart = () => {
+const IncidentTypeChart = ({ data = [] }) => {
+  const chartData = data.map(item => ({
+    ...item,
+    color: colors[item.name] || '#cbd5e0'
+  }));
+
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div className="chart-card">
+        <div className="chart-header">
+          <h3 className="chart-title">Incident Type</h3>
+        </div>
+        <div className="chart-content no-data">
+          <p>No data available</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="chart-card">
       <div className="chart-header">
@@ -24,7 +42,7 @@ const IncidentTypeChart = () => {
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
@@ -32,7 +50,7 @@ const IncidentTypeChart = () => {
                 paddingAngle={0}
                 dataKey="value"
               >
-                {data.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -40,7 +58,7 @@ const IncidentTypeChart = () => {
           </ResponsiveContainer>
         </div>
         <div className="chart-legend">
-          {data.map((entry, index) => (
+          {chartData.map((entry, index) => (
             <div key={index} className="legend-item">
               <span className="legend-color" style={{ backgroundColor: entry.color }}></span>
               <span className="legend-label">{entry.name}</span>
@@ -51,5 +69,6 @@ const IncidentTypeChart = () => {
     </div>
   );
 };
+
 
 export default IncidentTypeChart;

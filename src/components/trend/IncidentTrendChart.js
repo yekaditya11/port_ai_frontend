@@ -1,22 +1,7 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const IncidentTrendChart = () => {
-  const data = [
-    { name: '1', value: 10 },
-    { name: '2', value: 35 },
-    { name: '3', value: 38 },
-    { name: '4', value: 5 },
-    { name: '5', value: 5 },
-    { name: '6', value: 5 },
-    { name: '7', value: 5 },
-    { name: '8', value: 5 },
-    { name: '9', value: 5 },
-    { name: '10', value: 5 },
-    { name: '11', value: 5 },
-    { name: '12', value: 5 },
-  ];
-
+const IncidentTrendChart = ({ data = [] }) => {
   return (
     <div className="chart-card">
       <h3 className="chart-title">Incident trend</h3>
@@ -29,7 +14,7 @@ const IncidentTrendChart = () => {
               axisLine={false} 
               tickLine={false} 
               tick={{ fill: '#a0aec0', fontSize: 10 }}
-              label={{ value: 'Weeks', position: 'bottom', fill: '#a0aec0', fontSize: 12 }}
+              label={{ value: 'Weeks', position: 'bottom', fill: '#a0aec0', fontSize: 12, offset: -5 }}
             />
             <YAxis 
               axisLine={false} 
@@ -46,6 +31,7 @@ const IncidentTrendChart = () => {
               stroke="#78d2c0" 
               strokeWidth={2} 
               dot={{ fill: '#f46a6a', r: 3 }}
+              activeDot={{ r: 5 }}
             />
           </LineChart>
         </ResponsiveContainer>

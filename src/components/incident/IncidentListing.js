@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Plus, 
   Search, 
@@ -7,100 +7,58 @@ import {
   AlertTriangle, 
   MoreVertical,
   ChevronDown,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react';
+import { api } from '../../services/api';
 import './IncidentListing.css';
 
-const IncidentListing = () => {
-  const [expandedId, setExpandedId] = React.useState(null);
-  const [showCalendar, setShowCalendar] = React.useState(false);
+const IncidentListing = ({ status: propStatus }) => {
+  const [expandedId, setExpandedId] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  
+  // Filters
+  const [filters] = useState({
+    status: propStatus || '',
+    incident_type: '',
+    incident_group: '',
+    shift: ''
+  });
+
+  const fetchIncidents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.getIncidents({
+        ...filters,
+        page,
+        page_size: 20
+      });
+      setIncidents(data.items);
+      setTotal(data.total);
+    } catch (err) {
+      console.error('Failed to fetch incidents:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, page]);
+
+  useEffect(() => {
+    fetchIncidents();
+  }, [fetchIncidents]);
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const incidents = [
-    {
-      id: 'INC03280780',
-      title: 'Environmental Impact',
-      category: 'Environment',
-      subCategory: 'Last Time Injury',
-      date: '27 Mar 2026',
-      time: '15:27',
-      location: 'Bunkering Station',
-      subLocation: 'Bunk Station 1',
-      context: 'Bulk Chemical Storage and Handling',
-      contextDetail: 'Environmental Pollution',
-      status: 'Inspection',
-      severity: '2 - Minor',
-      severityType: 'minor',
-      action: 'Investigation',
-      actionTime: '09.10.55',
-      details: {
-        title: 'Bunkering Station - Environment - Environmental Impact - 2-Minor - 3/27/2026 - 15:27 - Martin Debeloz',
-        shift: 'Shift 2',
-        critical: 'Yes',
-        reportedTo: '--',
-        inspectedDateTime: '27 Mar 26 | 15:28',
-        inspector: 'Martin Debeloz',
-        investigationDateTime: '--',
-        leadInvestigator: 'Martin Debeloz',
-        reportedDateTime: '27 Mar 26 | 15:27',
-        reportable: '--',
-        shiftManager: 'Martin Debeloz (IDA)',
-        actualSeverity: '2 - Minor',
-        potentialSeverity: '2 - Minor',
-        timeOfDay: 'Afternoon',
-        weather: '--',
-        classification: 'Work Related Incident',
-        reportedBy: 'Martin Debeloz',
-        recordable: '--'
-      }
-    },
-    {
-      id: 'INC03280779',
-      title: 'Infrastructure Damage',
-      category: 'Unspecified',
-      subCategory: '',
-      date: '26 Mar 2026',
-      time: '10:00',
-      location: 'Admin. Building',
-      subLocation: '',
-      context: 'Driving',
-      contextDetail: 'Obstruction',
-      status: 'Review',
-      severity: '2 - Minor',
-      severityType: 'minor',
-      action: '',
-      actionTime: '03.10.22',
-      details: {
-        title: 'Admin. Building - Other Incident - Infrastructure Damage - 2-Minor - 26/03/2026 - 10:00 - Martin Debeloz',
-        shift: 'Shift 3',
-        critical: 'No',
-        reportedTo: '--',
-        inspectedDateTime: '26 Mar 26 | 18:03',
-        inspector: 'Martin Debeloz',
-        investigationDateTime: '--',
-        leadInvestigator: 'Martin Debeloz',
-        reportedDateTime: '26 Mar 26 | 18:02',
-        reportable: '--',
-        shiftManager: 'Martin Debeloz (IDA)',
-        actualSeverity: '2 - Minor',
-        potentialSeverity: '2 - Minor',
-        timeOfDay: 'Twilight',
-        weather: '--',
-        classification: 'Work Related Incident',
-        reportedBy: 'Martin Debeloz',
-        recordable: '--'
-      }
-    }
-  ];
-
   const DetailRow = ({ label, value }) => (
     <div className="detail-row">
       <span className="detail-label">{label}</span>
       <span className="detail-colon">:</span>
-      <span className="detail-value">{value}</span>
+      <span className="detail-value">{value || '--'}</span>
     </div>
   );
 
@@ -114,18 +72,27 @@ const IncidentListing = () => {
     </div>
   );
 
+  const getSeverityType = (severity) => {
+    if (!severity) return 'minor';
+    const s = severity.toLowerCase();
+    if (s.includes('major') || s.includes('critical') || s.includes('fatal')) return 'major';
+    if (s.includes('moderate')) return 'moderate';
+    return 'minor';
+  };
+
   return (
     <div className="dashboard-layout-main" style={{ backgroundColor: '#f1f5f9' }}>
-      <div style={{ padding: '0 24px', marginTop: '20px' }}>
-         <div className="new-incident-btn">
-            <Plus size={16} /> NEW INCIDENT
-         </div>
-      </div>
+      {!propStatus && (
+        <div style={{ padding: '0 24px', marginTop: '20px' }}>
+           <div className="new-incident-btn">
+              <Plus size={16} /> NEW INCIDENT
+           </div>
+        </div>
+      )}
 
       <div className="content-padding" style={{ paddingTop: '10px' }}>
         <div className="incident-listing-container">
           
-          {/* Top Toolbar - Exact Match Design */}
           <div className="listing-toolbar">
             <div className="toolbar-filters">
               <FilterGroup label="Incident ID" />
@@ -135,168 +102,141 @@ const IncidentListing = () => {
               <div className="filter-group" style={{ position: 'relative', flex: '1.2' }} onClick={() => setShowCalendar(!showCalendar)}>
                  <div className="filter-inner">
                     <label className="filter-label">Date Range</label>
-                    <div className="filter-value">6 to 15 Apr</div>
+                    <div className="filter-value">Select Range</div>
                  </div>
                  <div className="date-icons">
                     <span className="clear-icon" style={{ fontSize: '14px', marginRight: '5px' }}>×</span>
                     <Calendar size={14} className="calendar-icon" />
                     <ChevronDown size={14} className="select-icon-relative" />
                  </div>
-                 
-                 {showCalendar && (
-                   <div className="calendar-overlay">
-                      <div className="calendar-header">
-                        <span>‹</span>
-                        <span>Apr - 2026</span>
-                        <span>May - 2026</span>
-                        <span>›</span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '20px' }}>
-                        <div className="month-grid">
-                           <div className="days-header"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
-                           <div className="days-grid">
-                             {[...Array(30)].map((_, i) => (
-                               <span key={i} className={(i > 5 && i < 15) ? 'day-range' : (i === 5 || i === 15) ? 'day-selected' : ''}>{i + 1}</span>
-                             ))}
-                           </div>
-                        </div>
-                        <div className="month-grid">
-                           <div className="days-header"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
-                           <div className="days-grid">
-                             {[...Array(31)].map((_, i) => (
-                               <span key={i}>{i + 1}</span>
-                             ))}
-                           </div>
-                        </div>
-                      </div>
-                   </div>
-                 )}
               </div>
-              <button className="btn-search">SEARCH</button>
+              <button className="btn-search" onClick={fetchIncidents}>SEARCH</button>
             </div>
           </div>
 
-          {/* Results Meta */}
           <div className="listing-meta">
-            <div className="results-count">Listing 1 - 20 OF 104</div>
+            <div className="results-count">
+              {loading ? 'Loading...' : `Listing 1 - ${incidents.length} OF ${total}`}
+            </div>
             <div className="meta-actions">
               <Search size={18} />
               <Settings size={18} />
             </div>
           </div>
 
-          {/* Incident List */}
           <div className="incident-list">
-            {incidents.map((incident, index) => (
-              <React.Fragment key={index}>
-                <div className={`incident-card ${expandedId === incident.id ? 'is-expanded' : ''}`}>
-                  
-                  {/* ID & Title */}
-                  <div className="card-column">
-                    <div className="item-title">{incident.title}</div>
-                    <div className="item-id">
-                      {incident.id}
-                      <Monitor size={14} />
+            {loading ? (
+              <div style={{ padding: '40px', textAlign: 'center' }}>
+                <Loader2 className="animate-spin" size={32} color="#22d3ee" style={{ margin: '0 auto' }} />
+                <p style={{ marginTop: '10px', color: '#64748b' }}>Fetching incidents...</p>
+              </div>
+            ) : incidents.length === 0 ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>No incidents found.</div>
+            ) : (
+              incidents.map((incident) => {
+                const severityType = getSeverityType(incident.actual_severity);
+                return (
+                  <React.Fragment key={incident.id}>
+                    <div className={`incident-card ${expandedId === incident.id ? 'is-expanded' : ''}`}>
+                      <div className="card-column">
+                        <div className="item-title">{incident.incident_title}</div>
+                        <div className="item-id">
+                          {incident.incident_ref}
+                          <Monitor size={14} />
+                        </div>
+                      </div>
+
+                      <div className="card-column">
+                        <div className="item-label">{incident.incident_type}</div>
+                        <div className="item-value">{incident.incident_group}</div>
+                      </div>
+
+                      <div className="card-column">
+                        <div className="item-label">
+                          {incident.incident_date ? new Date(incident.incident_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '--'}
+                        </div>
+                        <div className="item-value">
+                          {incident.incident_date ? new Date(incident.incident_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--'}
+                        </div>
+                      </div>
+
+                      <div className="card-column">
+                        <div className="item-label">{incident.area_of_incident}</div>
+                        <div className="item-value">{incident.sub_area}</div>
+                      </div>
+
+                      <div className="card-column">
+                        <div className="item-label">{incident.operational_activity}</div>
+                        <div className="item-value">{incident.risk_category}</div>
+                      </div>
+
+                      <div className="card-column">
+                        <div className="status-label">{incident.status}</div>
+                        {incident.actual_severity && (
+                          <div className={`severity-pill severity-${severityType}`}>
+                            {incident.actual_severity}
+                            <AlertTriangle size={12} fill={severityType === 'major' ? '#ef4444' : '#f59e0b'} color="#fff" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="card-column" style={{ alignItems: 'flex-end' }}>
+                        <div className="item-label" style={{ fontWeight: '700' }}>{incident.status === 'New' ? 'Review' : incident.status}</div>
+                        <div className="item-value" style={{ fontSize: '11px' }}>00.00.00</div>
+                      </div>
+
+                      <div className="card-column" style={{ alignItems: 'flex-end' }}>
+                        <MoreVertical size={18} style={{ color: '#94a3b8', cursor: 'pointer' }} />
+                        <ChevronDown 
+                          size={14} 
+                          style={{ 
+                            color: '#22d3ee', 
+                            marginTop: '8px', 
+                            cursor: 'pointer',
+                            transform: expandedId === incident.id ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.2s'
+                          }} 
+                          onClick={() => toggleExpand(incident.id)}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Category */}
-                  <div className="card-column">
-                    <div className="item-label">{incident.category}</div>
-                    <div className="item-value">{incident.subCategory}</div>
-                  </div>
-
-                  {/* Date Time */}
-                  <div className="card-column">
-                    <div className="item-label">{incident.date}</div>
-                    <div className="item-value">{incident.time}</div>
-                  </div>
-
-                  {/* Location */}
-                  <div className="card-column">
-                    <div className="item-label">{incident.location}</div>
-                    <div className="item-value">{incident.subLocation}</div>
-                  </div>
-
-                  {/* Context */}
-                  <div className="card-column">
-                    <div className="item-label">{incident.context}</div>
-                    <div className="item-value">{incident.contextDetail}</div>
-                  </div>
-
-                  {/* Status & Severity */}
-                  <div className="card-column">
-                    <div className="status-label">
-                      {incident.status}
-                    </div>
-                    {incident.severity && (
-                      <div className={`severity-pill severity-${incident.severityType}`}>
-                        {incident.severity}
-                        <AlertTriangle size={12} fill={incident.severityType === 'major' ? '#ef4444' : '#f59e0b'} color="#fff" />
+                    {expandedId === incident.id && (
+                      <div className="expanded-detail-box">
+                        <div className="detail-grid">
+                          <div className="detail-col">
+                            <DetailRow label="Incident Title" value={incident.incident_title} />
+                            <DetailRow label="Shift" value={incident.shift} />
+                            <DetailRow label="Critical Incident" value={incident.critical_incident} />
+                            <DetailRow label="Reported To" value={incident.reported_to_name} />
+                            <DetailRow label="Inspected Date & Time" value={incident.inspected_date_time} />
+                            <DetailRow label="Inspector" value={incident.inspector_name} />
+                            <DetailRow label="Investigation Date & Time" value={incident.investigation_date_time} />
+                            <DetailRow label="Lead Investigator" value={incident.lead_investigator_name} />
+                            <DetailRow label="Reported Date & Time" value={incident.reported_date_time} />
+                            <DetailRow label="Reportable" value={incident.reportable} />
+                          </div>
+                          <div className="detail-col">
+                            <DetailRow label="Shift Manager" value={incident.shift_manager_name} />
+                            <DetailRow label="Actual Severity" value={incident.actual_severity} />
+                            <DetailRow label="Potential Severity" value={incident.potential_severity} />
+                            <DetailRow label="Time of Day" value={incident.time_of_day} />
+                            <DetailRow label="Weather" value={incident.weather} />
+                            <DetailRow label="Work Activity Classification" value={incident.classification} />
+                            <DetailRow label="Reported By" value={incident.reported_by_name} />
+                            <DetailRow label="Recordable" value={incident.recordable} />
+                          </div>
+                        </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* Action & Time */}
-                  <div className="card-column" style={{ alignItems: 'flex-end' }}>
-                    <div className="item-label" style={{ fontWeight: '700' }}>{incident.action}</div>
-                    <div className="item-value" style={{ fontSize: '11px' }}>{incident.actionTime}</div>
-                  </div>
-
-                  {/* Menu */}
-                  <div className="card-column" style={{ alignItems: 'flex-end' }}>
-                    <MoreVertical size={18} style={{ color: '#94a3b8', cursor: 'pointer' }} />
-                    <ChevronDown 
-                      size={14} 
-                      style={{ 
-                        color: '#22d3ee', 
-                        marginTop: '8px', 
-                        cursor: 'pointer',
-                        transform: expandedId === incident.id ? 'rotate(180deg)' : 'none',
-                        transition: 'transform 0.2s'
-                      }} 
-                      onClick={() => toggleExpand(incident.id)}
-                    />
-                  </div>
-
-                </div>
-
-                {/* Expanded Detail Box */}
-                {expandedId === incident.id && (
-                  <div className="expanded-detail-box">
-                    <div className="detail-grid">
-                      <div className="detail-col">
-                        <DetailRow label="Incident Title" value={incident.details.title} />
-                        <DetailRow label="Shift" value={incident.details.shift} />
-                        <DetailRow label="Critical Incident" value={incident.details.critical} />
-                        <DetailRow label="Reported To" value={incident.details.reportedTo} />
-                        <DetailRow label="Inspected Date & Time" value={incident.details.inspectedDateTime} />
-                        <DetailRow label="Inspector" value={incident.details.inspector} />
-                        <DetailRow label="Investigation Date & Time" value={incident.details.investigationDateTime} />
-                        <DetailRow label="Lead Investigator" value={incident.details.leadInvestigator} />
-                        <DetailRow label="Reported Date & Time" value={incident.details.reportedDateTime} />
-                        <DetailRow label="Reportable" value={incident.details.reportable} />
-                      </div>
-                      <div className="detail-col">
-                        <DetailRow label="Shift Manager" value={incident.details.shiftManager} />
-                        <DetailRow label="Actual Severity" value={incident.details.actualSeverity} />
-                        <DetailRow label="Potential Severity" value={incident.details.potentialSeverity} />
-                        <DetailRow label="Time of Day" value={incident.details.timeOfDay} />
-                        <DetailRow label="Weather" value={incident.details.weather} />
-                        <DetailRow label="Work Activity Classification" value={incident.details.classification} />
-                        <DetailRow label="Reported By" value={incident.details.reportedBy} />
-                        <DetailRow label="Recordable" value={incident.details.recordable} />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
+                  </React.Fragment>
+                );
+              })
+            )}
           </div>
 
-          {/* Pagination Footer */}
           <div className="load-more-container">
-            <button className="load-more-btn">LOAD MORE</button>
+            <button className="load-more-btn" disabled={loading} onClick={() => setPage(p => p + 1)}>LOAD MORE</button>
           </div>
 
         </div>
@@ -306,3 +246,4 @@ const IncidentListing = () => {
 };
 
 export default IncidentListing;
+

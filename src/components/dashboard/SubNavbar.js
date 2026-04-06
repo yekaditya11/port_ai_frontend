@@ -40,6 +40,14 @@ const SubNavbar = ({ style, onClose }) => {
       navigate('/incident/inspection-listing');
     } else if (label === 'Investigation') {
       navigate('/incident/investigation');
+    } else if (label === 'Root Cause') {
+      navigate('/incident/root-cause-analysis');
+    } else if (label === 'Resolution') {
+      navigate('/incident/resolution');
+    } else if (label === 'Action') {
+      navigate('/incident/action');
+    } else if (label === 'Workflow') {
+      navigate('/incident/workflow');
     }
     if (onClose) onClose();
   };
@@ -65,15 +73,15 @@ const SubNavbar = ({ style, onClose }) => {
       label: 'Trend Dashboard',
       active: location.pathname === '/incident/trend'
     },
-    { icon: <FilePlus size={24} />, label: 'New' },
-    { icon: <ClipboardList size={24} />, label: 'Listing' },
-    { icon: <Search size={24} />, label: 'Review' },
-    { icon: <Eye size={24} />, label: 'Inspection' },
-    { icon: <SearchCode size={24} />, label: 'Investigation' },
-    { icon: <Zap size={24} />, label: 'Root Cause' },
-    { icon: <CheckCircle size={24} />, label: 'Resolution' },
-    { icon: <GitBranch size={24} />, label: 'Action' },
-    { icon: <Network size={24} />, label: 'Workflow' },
+    { icon: <FilePlus size={24} />, label: 'New', active: location.pathname === '/incident/create-new-incident' },
+    { icon: <ClipboardList size={24} />, label: 'Listing', active: location.pathname === '/incident/listing' },
+    { icon: <Search size={24} />, label: 'Review', active: location.pathname === '/incident/review' },
+    { icon: <Eye size={24} />, label: 'Inspection', active: location.pathname === '/incident/inspection-listing' },
+    { icon: <SearchCode size={24} />, label: 'Investigation', active: location.pathname === '/incident/investigation' },
+    { icon: <Zap size={24} />, label: 'Root Cause', active: location.pathname === '/incident/root-cause-analysis' },
+    { icon: <CheckCircle size={24} />, label: 'Resolution', active: location.pathname === '/incident/resolution' },
+    { icon: <GitBranch size={24} />, label: 'Action', active: location.pathname === '/incident/action' },
+    { icon: <Network size={24} />, label: 'Workflow', active: location.pathname === '/incident/workflow' },
     { icon: <Files size={24} />, label: 'Reports' },
     { icon: <FileSignature size={24} />, label: 'Masters' },
     { icon: <Settings2 size={24} />, label: 'Configuration' },

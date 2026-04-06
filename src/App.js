@@ -7,6 +7,10 @@ import IncidentListing from './components/incident/IncidentListing';
 import IncidentReview from './components/incident/IncidentReview';
 import IncidentInspection from './components/incident/IncidentInspection';
 import IncidentInvestigation from './components/incident/IncidentInvestigation';
+import RootCauseAnalysis from './components/incident/RootCauseAnalysis';
+import IncidentResolution from './components/incident/IncidentResolution';
+import IncidentAction from './components/incident/IncidentAction';
+import IncidentWorkflow from './components/incident/IncidentWorkflow';
 
 function App() {
   return (
@@ -22,6 +26,10 @@ function App() {
           <Route path="/incident/review" element={<IncidentReview />} />
           <Route path="/incident/inspection-listing" element={<IncidentInspection />} />
           <Route path="/incident/investigation" element={<IncidentInvestigation />} />
+          <Route path="/incident/root-cause-analysis" element={<RootCauseAnalysis />} />
+          <Route path="/incident/resolution" element={<IncidentResolution />} />
+          <Route path="/incident/action" element={<IncidentAction />} />
+          <Route path="/incident/workflow" element={<IncidentWorkflow />} />
         </Routes>
       </DashboardLayout>
     </BrowserRouter>
