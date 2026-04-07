@@ -1,3 +1,4 @@
+/* ── Base layout ── */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
@@ -8,7 +9,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Prevents flex items from overflowing */
+  min-width: 0;
+  transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Shrink main content when chat panel is open */
+.chat-open .main-container {
+  margin-right: var(--chat-panel-width, 420px);
 }
 
 .content {
@@ -34,4 +41,29 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.4);
   z-index: 75;
+}
+
+/* ── Chat slide-in panel ── */
+:root {
+  --chat-panel-width: 420px;
+}
+
+.chat-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--chat-panel-width);
+  height: 100vh;
+  background: #f0f2f5;
+  border-left: 1px solid #e0e4f0;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.10);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-panel--open {
+  transform: translateX(0);
 }

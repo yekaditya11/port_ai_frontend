@@ -8,8 +8,8 @@ import './Sidebar.css';
 
 const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
   const menuItems = [
-    { icon: <Eye size={20} />, label: 'Observation' },
-    { icon: <FileText size={20} />, label: 'Incident Management', active: true },
+    { icon: <Eye size={20} />, label: 'Observation', hasShelf: true },
+    { icon: <FileText size={20} />, label: 'Incident Management', hasShelf: true },
   ];
 
   return (
@@ -24,32 +24,35 @@ const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
         <span className="logo-text">QAVACH</span>
       </div>
       <nav className="sidebar-nav">
-        {menuItems.map((item, index) => (
-          <button 
-            key={index} 
-            className={`nav-item ${item.active ? 'active' : ''}`}
-            onMouseEnter={(e) => {
-              if (item.label === 'Incident Management' || item.label === 'Observation') {
-                const rect = e.currentTarget.getBoundingClientRect();
-                onToggleShelf(true, rect.top, item.label);
-              }
-            }}
-            onClick={(e) => {
-              if (item.label === 'Incident Management' || item.label === 'Observation') {
-                const rect = e.currentTarget.getBoundingClientRect();
-                onToggleShelf(true, rect.top, item.label);
-              }
-            }}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            <span className="nav-label">{item.label}</span>
-            {(item.label === 'Incident Management' || item.label === 'Observation') && (
-              <span className="nav-chevron">
-                {isShelfOpen && activeMenu === item.label ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-              </span>
-            )}
-          </button>
-        ))}
+        {menuItems.map((item, index) => {
+          const isActive = activeMenu === item.label;
+          return (
+            <button
+              key={index}
+              className={`nav-item ${isActive ? 'active' : ''}`}
+              onMouseEnter={(e) => {
+                if (item.hasShelf) {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onToggleShelf(true, rect.top, item.label);
+                }
+              }}
+              onClick={(e) => {
+                if (item.hasShelf) {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onToggleShelf(true, rect.top, item.label);
+                }
+              }}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+              {item.hasShelf && (
+                <span className="nav-chevron">
+                  {isShelfOpen && activeMenu === item.label ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </nav>
       <div className="sidebar-footer">
       </div>

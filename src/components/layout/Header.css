@@ -139,3 +139,18 @@
 .user-dropdown-icon {
   color: var(--text-muted);
 }
+
+/* ── Chat AI toggle button ── */
+.chat-toggle-btn {
+  transition: all 0.2s;
+}
+
+.chat-toggle-btn--active {
+  color: #4f6ef7 !important;
+  background-color: rgba(79, 110, 247, 0.1) !important;
+  border-radius: 6px;
+}
+
+.chat-toggle-btn--active:hover {
+  background-color: rgba(79, 110, 247, 0.18) !important;
+}

@@ -2,7 +2,6 @@ import { useLocation } from 'react-router-dom';
 import {
   ChevronRight,
   LayoutGrid,
-  MessageSquare,
   Settings,
   Languages,
   Bell,
@@ -12,7 +11,7 @@ import {
 } from 'lucide-react';
 import './Header.css';
 
-const Header = () => {
+const Header = ({ onToggleChat, isChatOpen }) => {
   const location = useLocation();
   const path = location.pathname;
 
@@ -69,6 +68,10 @@ const Header = () => {
       breadcrumbLast = "Configuration";
       pageTitle = "Configuration";
     }
+  } else if (path === '/chat-ai') {
+    breadcrumbMid = 'Chat AI';
+    breadcrumbLast = 'Assistant';
+    pageTitle = 'Chat AI';
   } else if (path.includes('/incident/')) {
     breadcrumbMid = "Incident Management";
     if (path.includes('/trend')) {
@@ -119,7 +122,31 @@ const Header = () => {
 
       <div className="header-right">
         <button className="icon-btn"><LayoutGrid size={20} /></button>
-        <button className="icon-btn"><MessageSquare size={20} /></button>
+        <button
+          className={`icon-btn chat-toggle-btn ${isChatOpen ? 'chat-toggle-btn--active' : ''}`}
+          onClick={onToggleChat}
+          title="Chat AI"
+        >
+          <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M14 2
+                 C 14 2, 14.4 9.2, 19.8 14
+                 C 14.4 18.8, 14 26, 14 26
+                 C 14 26, 13.6 18.8, 8.2 14
+                 C 13.6 9.2, 14 2, 14 2 Z"
+              fill="currentColor"
+            />
+            <path
+              d="M2 14
+                 C 2 14, 9.2 14.4, 14 19.8
+                 C 14 13.6, 26 14, 26 14
+                 C 26 14, 18.8 13.6, 14 8.2
+                 C 9.2 13.6, 2 14, 2 14 Z"
+              fill="currentColor"
+              opacity="0.65"
+            />
+          </svg>
+        </button>
         <button className="icon-btn"><Settings size={20} /></button>
         <button className="icon-btn"><Languages size={20} /> <span className="btn-label">A Z</span></button>
         <button className="icon-btn badge-container">
