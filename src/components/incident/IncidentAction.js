@@ -4,9 +4,9 @@ import {
   Settings, 
   ChevronDown,
   Calendar,
-  MoreVertical,
-  Loader2
+  MoreVertical
 } from 'lucide-react';
+import Loader from '../common/Loader';
 import { api } from '../../services/api';
 import './IncidentAction.css';
 
@@ -103,7 +103,7 @@ const IncidentAction = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="14" style={{ padding: '40px', textAlign: 'center' }}>
-                      <Loader2 className="animate-spin" size={32} color="#22d3ee" style={{ margin: '0 auto' }} />
+                      <Loader size={32} style={{ margin: '0 auto' }} />
                     </td>
                   </tr>
                 ) : actionsData.length === 0 ? (

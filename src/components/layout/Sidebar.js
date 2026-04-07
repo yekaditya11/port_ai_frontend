@@ -1,13 +1,17 @@
 import { 
   Eye, 
   FileText,
+  Box,
   ChevronRight, 
   ChevronLeft 
 } from 'lucide-react';
 import './Sidebar.css';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
+  const navigate = useNavigate();
   const menuItems = [
+    { icon: <Box size={20} />, label: 'Live Twin', path: '/digital-twin' },
     { icon: <Eye size={20} />, label: 'Observation', hasShelf: true },
     { icon: <FileText size={20} />, label: 'Incident Management', hasShelf: true },
   ];
@@ -21,11 +25,11 @@ const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
             <circle cx="12" cy="12" r="4" fill="white" />
           </svg>
         </div>
-        <span className="logo-text">QAVACH</span>
+        <span className="logo-text">PORT AI</span>
       </div>
       <nav className="sidebar-nav">
         {menuItems.map((item, index) => {
-          const isActive = activeMenu === item.label;
+          const isActive = activeMenu === item.label || (item.path && window.location.pathname === item.path);
           return (
             <button
               key={index}
@@ -37,6 +41,10 @@ const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
                 }
               }}
               onClick={(e) => {
+                if (item.path) {
+                  navigate(item.path);
+                  return;
+                }
                 if (item.hasShelf) {
                   const rect = e.currentTarget.getBoundingClientRect();
                   onToggleShelf(true, rect.top, item.label);

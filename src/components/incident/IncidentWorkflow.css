@@ -34,6 +34,8 @@
 /* Table */
 .workflow-table-wrapper {
   overflow-x: auto; /* ENABLE HORIZONTAL SCROLLING */
+  overflow-y: auto; /* ENABLE VERTICAL SCROLLING */
+  max-height: 480px;
   width: 100%;
   background-color: #fff;
   scrollbar-width: thin;
@@ -72,7 +74,7 @@
 }
 
 .cell-cyan {
-  color: #22d3ee !important;
+  color: var(--brand-cyan, #00c4f4) !important;
   cursor: pointer;
 }
 

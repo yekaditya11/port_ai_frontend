@@ -25,7 +25,6 @@ const ObservationClosure = () => {
     };
     fetchClosedObservations();
   }, []);
-  const [hasLoadedMore, setHasLoadedMore] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [filterDates, setFilterDates] = useState({

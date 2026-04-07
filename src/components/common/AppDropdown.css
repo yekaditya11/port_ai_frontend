@@ -1,0 +1,142 @@
+/* AppDropdown.css */
+.rev-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rev-field-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rev-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.rev-dropdown-container.is-open {
+  z-index: 1000;
+}
+
+.rev-dropdown-header {
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 11px;
+}
+
+.rev-dropdown-header:hover {
+  border-color: #cbd5e1;
+}
+
+.rev-dropdown-header.open {
+  border-color: #00c4f4;
+  box-shadow: 0 0 0 2px rgba(0, 196, 244, 0.1);
+  background: white;
+}
+
+.rev-dropdown-header.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f1f5f9;
+}
+
+.rev-dropdown-selected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-arrow {
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-arrow.up {
+  transform: rotate(180deg);
+}
+
+.rev-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.rev-dropdown-item {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.1s ease;
+}
+
+.rev-dropdown-item:hover {
+  background-color: #f1f5f9;
+}
+
+.rev-dropdown-item.selected {
+  background-color: #f8fafc;
+  color: #00c4f4;
+  font-weight: 600;
+}
+
+.audit-sparkle {
+  color: #f59e0b;
+  cursor: help;
+  transition: transform 0.2s ease;
+}
+
+.audit-sparkle.active {
+  transform: scale(1.2);
+}
+
+.audit-insight-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 240px;
+  background: #1e293b;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  z-index: 10001;
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 10px;
+  margin-top: 2px;
+}

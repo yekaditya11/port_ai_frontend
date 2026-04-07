@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   PlusCircle, ChevronDown, Calendar, Search, Settings, 
-  MapPin, Clock, MoreVertical, Monitor, PlusCircle as OrangeIcon, X,
+  MapPin, Clock, MoreVertical, Monitor, X,
   Loader2
 } from 'lucide-react';
 import { api } from '../../services/api';
 import './ObservationListing.css';
-import '../common/DateRangePicker.css';
+import DateRangePicker from '../common/DateRangePicker';
 
 const ObservationListing = () => {
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const ObservationListing = () => {
 
   useEffect(() => {
     fetchObservations();
-  }, []); // Initial load only
+  }, [fetchObservations]); // Initial load only
 
   const handleSearch = () => {
     fetchObservations(false);
@@ -171,37 +171,18 @@ const ObservationListing = () => {
           </div>
           <ChevronDown size={12} className="obs-filter-box-arrow" />
           {isDatePickerOpen && (
-            <div className="date-range-popover" onClick={(e) => e.stopPropagation()} style={{ 
-              position: 'absolute', top: '100%', left: 0, zIndex: 100, backgroundColor: '#fff', 
-              padding: '12px', border: '1px solid #e2e8f0', borderRadius: '4px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-              width: '200px'
-            }}>
-              <div className="date-range-popover-row" style={{ marginBottom: '8px' }}>
-                <span className="date-range-label" style={{ fontSize: '10px', color: '#94a3b8', display: 'block' }}>From Date</span>
-                <input 
-                  type="date" 
-                  className="date-range-input" 
-                  value={filters.from_date}
-                  onChange={(e) => setFilters({ ...filters, from_date: e.target.value })}
-                  style={{ width: '100%', fontSize: '12px' }}
-                />
-              </div>
-              <div className="date-range-popover-row">
-                <span className="date-range-label" style={{ fontSize: '10px', color: '#94a3b8', display: 'block' }}>To Date</span>
-                <input 
-                  type="date" 
-                  className="date-range-input" 
-                  value={filters.to_date}
-                  onChange={(e) => setFilters({ ...filters, to_date: e.target.value })}
-                  style={{ width: '100%', fontSize: '12px' }}
-                />
-              </div>
-              <button 
-                className="btn-search" 
-                style={{ width: '100%', marginTop: '10px', height: '30px' }} 
-                onClick={() => { setIsDatePickerOpen(false); handleSearch(); }}
-              >APPLY</button>
-            </div>
+            <DateRangePicker 
+              startDate={filters.from_date ? new Date(filters.from_date) : null}
+              endDate={filters.to_date ? new Date(filters.to_date) : null}
+              onSelect={(start, end) => {
+                setFilters(prev => ({
+                  ...prev,
+                  from_date: start ? start.toISOString().split('T')[0] : '',
+                  to_date: end ? end.toISOString().split('T')[0] : ''
+                }));
+              }}
+              onClose={() => setIsDatePickerOpen(false)}
+            />
           )}
         </div>
         <button className="btn-search" onClick={handleSearch}>SEARCH</button>

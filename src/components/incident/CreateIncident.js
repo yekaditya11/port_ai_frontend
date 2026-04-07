@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, 
-  ChevronRight, 
   Clock, 
   MapPin, 
   ChevronDown, 
   Plus, 
   Eye, 
   Paperclip,
+  Mic,
   Languages,
-  Loader2
+  Play
 } from 'lucide-react';
+import Loader from '../common/Loader';
 import { api } from '../../services/api';
 import './CreateIncident.css';
 
@@ -69,15 +71,16 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
   };
 
   return (
-    <div className={`form-field ${error ? 'has-error' : ''}`} ref={containerRef}>
+    <div className={`form-field ${error ? 'has-error' : ''} ${isOpen ? 'is-open' : ''}`} ref={containerRef}>
       <label className="field-label">
         {label}
         {required && <span className="required-star">*</span>}
       </label>
-      <div className="app-dropdown-container">
+      <div className={`app-dropdown-container ${isOpen ? 'is-open' : ''}`}>
         <div 
           className={`app-dropdown-trigger ${isOpen ? 'is-open' : ''}`} 
           onClick={handleToggle}
+          tabIndex={0}
         >
           <span className={`app-dropdown-value ${(multi ? (Array.isArray(value) && value.length > 0) : (value && value !== 'Select')) ? 'has-value' : ''}`}>
             {getDisplayValue()}
@@ -86,7 +89,15 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
         </div>
         
         {isOpen && (
-          <div className="app-dropdown-menu">
+          <div 
+            className="app-dropdown-menu"
+            style={{ 
+              backgroundColor: '#ffffff', 
+              opacity: 1, 
+              zIndex: 9999,
+              boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+            }}
+          >
             {options.map(option => (
               <div 
                 key={getOptionKey(option)} 
@@ -114,8 +125,32 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
   );
 };
 
-const CreateIncident = () => {
+const CreateIncident = ({ prefillData = null, prefillPersons = null }) => {
+  const navigate = useNavigate();
+
+  // Strip "--" placeholder values that come from the server's format_incident
+  const cleanPrefill = (data) => {
+    if (!data) return null;
+    const cleaned = {};
+    for (const [key, val] of Object.entries(data)) {
+      if (val === '--' || val === 'Select') {
+        cleaned[key] = Array.isArray(val) ? [] : '';
+      } else {
+        cleaned[key] = val;
+      }
+    }
+    // Ensure array fields are always arrays
+    cleaned.incident_type = Array.isArray(cleaned.incident_type) ? cleaned.incident_type : [];
+    cleaned.incident_group = Array.isArray(cleaned.incident_group) ? cleaned.incident_group : [];
+    cleaned.sub_group = Array.isArray(cleaned.sub_group) ? cleaned.sub_group : [];
+    cleaned.risk_category = Array.isArray(cleaned.risk_category) ? cleaned.risk_category : (cleaned.risk_category ? [cleaned.risk_category] : []);
+    // These are read-only display fields — clear them so a new incident gets fresh values
+    cleaned.incident_ref = '';
+    cleaned.status = '';
+    return cleaned;
+  };
   const [openSections, setOpenSections] = useState({
+    work_activity: true,
     involved: true,
     witness: true,
     equipment: true,
@@ -135,27 +170,36 @@ const CreateIncident = () => {
   const [errors, setErrors] = useState({});
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [attachments, setAttachments] = useState([]);
+  const [notification, setNotification] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [isManualTitle, setIsManualTitle] = useState(false);
 
+  const [involvedPersons, setInvolvedPersons] = useState(
+    prefillPersons && prefillPersons.length > 0 ? prefillPersons :
+    [{ worker_type: 'Select', name: 'Select', id: '', age: '', department: '', designation: '', particulars: '' }]
+  );
   const now = new Date();
   const currentDate = now.toISOString().split('T')[0];
   const currentTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => {
+    const clean = cleanPrefill(prefillData);
+    return clean ? { ...clean } : {
     incident_title: '',
-    incident_type: [], // Adjusted to array for multi-select
+    incident_type: [],
     incident_group: [], 
-    sub_group: [], // Adjusted to array for multi-select
+    sub_group: [],
     area_of_incident: '',
     sub_area: '',
     operational_activity: '',
-    risk_category: '',
+    risk_category: [],
     actual_severity: 'Select',
     potential_severity: 'Select',
     critical_incident: 'Select',
     shift: 'Shift 3',
     time_of_day: 'Twilight',
     weather: 'Select',
-    classification: 'Work Related Incident',
+    work_activity_classification: 'Work Related Incident',
     reported_by_id: '',
     reported_to_id: '',
     shift_manager_id: 'Select',
@@ -164,11 +208,13 @@ const CreateIncident = () => {
     incident_time: currentTime,
     reported_date: currentDate,
     reported_time: currentTime,
+    reported_by_type: 'Someone Else',
+    reported_to_type: 'Someone Else',
     description: '',
     immediate_action: '',
     shipping_line: 'Select',
     container_number: '',
-  });
+  }});
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -190,16 +236,17 @@ const CreateIncident = () => {
 
   // Sync title dynamically
   useEffect(() => {
+    if (isManualTitle) return;
+    
     const typeLabel = formData.incident_type.length > 0 ? formData.incident_type.join(', ') : '';
     const groupLabel = formData.incident_group.length > 0 ? formData.incident_group.join(', ') : 'Select';
-    const dateFormatted = new Date(formData.incident_date).toLocaleDateString('en-GB');
     const userName = users.find(u => u.id === formData.reported_by_id)?.name || 'Martin Debeloz';
     
     // Combining types and groups into title
     const prefix = typeLabel ? `${typeLabel} - ${groupLabel}` : groupLabel;
-    const newTitle = `${prefix} - ${dateFormatted} - ${formData.incident_time} - ${userName}`;
+    const newTitle = `${prefix} - ${userName}`;
     setFormData(prev => ({ ...prev, incident_title: newTitle }));
-  }, [formData.incident_type, formData.incident_group, formData.incident_date, formData.incident_time, formData.reported_by_id, users]);
+  }, [formData.incident_type, formData.incident_group, formData.incident_date, formData.incident_time, formData.reported_by_id, users, isManualTitle]);
 
   // Fetch sub-areas when area changes
   useEffect(() => {
@@ -229,7 +276,7 @@ const CreateIncident = () => {
     if (formData.incident_type.length === 0) newErrors.incident_type = 'Incident Type is required.';
     if (formData.incident_group.length === 0) newErrors.incident_group = 'Incident Group is required.';
     if (formData.sub_group.length === 0) newErrors.sub_group = 'Sub Group is required.';
-    if (!formData.risk_category) newErrors.risk_category = 'Risk Category is required.';
+    if (!formData.risk_category || formData.risk_category.length === 0) newErrors.risk_category = 'Risk Category is required.';
     if (!formData.description) newErrors.description = 'Incident Description is required.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -242,19 +289,129 @@ const CreateIncident = () => {
     }
     setSubmitting(true);
     try {
+      // Sanitize fields: convert "Select" and empty strings to null for the backend
+      const sanitizedData = {};
+      Object.keys(formData).forEach(key => {
+        const val = formData[key];
+        if (val === 'Select' || val === '') {
+          sanitizedData[key] = null;
+        } else {
+          sanitizedData[key] = val;
+        }
+      });
+
       const payload = {
-        ...formData,
+        ...sanitizedData,
         reported_date: new Date().toISOString(),
         incident_date: `${formData.incident_date}T${formData.incident_time}:00Z`,
-        attachments: attachments
+        attachments: attachments,
+        involved_persons: involvedPersons.map(p => ({
+          worker_type: p.worker_type !== 'Select' ? p.worker_type : null,
+          person_name: p.name !== 'Select' ? p.name : null,
+          employee_id: p.id || null,
+          department: p.department || null,
+          designation: p.designation || null,
+          particulars: p.particulars || null,
+          person_id: p.person_id || null
+        })).filter(p => p.person_name || p.worker_type) // Only send if at least name or type is set
       };
       const result = await api.createIncident(payload);
-      alert(`Incident created successfully! Ref: ${result.incident_ref}`);
+      
+      // Show custom notification instead of alert
+      setNotification({
+        type: 'success',
+        message: 'Incident Created Successfully',
+        ref: result.incident_ref
+      });
+
+      // Redirect after a short delay to let user see the success message
+      setTimeout(() => {
+        setNotification(null);
+        navigate('/incident/listing');
+      }, 2000);
+
     } catch (err) {
-      alert(`Failed to create incident: ${err.message}`);
+      setNotification({
+        type: 'error',
+        message: `Failed to create incident: ${err.message}`
+      });
+      setTimeout(() => setNotification(null), 5000);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleAIAnalysis = async (file, modalDescription = '') => {
+    setAnalyzing(true);
+    try {
+      const aiData = await api.analyzeIncidentMedia(file, modalDescription);
+      
+      if (aiData.error) {
+        throw new Error(aiData.message || aiData.error);
+      }
+
+      // Helper to strip accidental HTML tags
+      const stripHtml = (str) => {
+        if (!str) return '';
+        return str.replace(/<[^>]*>?/gm, '');
+      };
+
+      setFormData(prev => ({
+        ...prev,
+        incident_title: aiData.incident_title || prev.incident_title,
+        description: stripHtml(aiData.description) || prev.description,
+        immediate_action: stripHtml(aiData.immediate_action) || prev.immediate_action,
+        incident_type: Array.isArray(aiData.incident_type) ? aiData.incident_type : prev.incident_type,
+        incident_group: Array.isArray(aiData.incident_group) ? aiData.incident_group : prev.incident_group,
+        sub_group: Array.isArray(aiData.sub_group) ? aiData.sub_group : prev.sub_group,
+        operational_activity: aiData.operational_activity || prev.operational_activity,
+        area_of_incident: aiData.area_of_incident || prev.area_of_incident,
+        // Risk category must be an array for multi-select
+        risk_category: aiData.risk_category ? (Array.isArray(aiData.risk_category) ? aiData.risk_category : [aiData.risk_category]) : prev.risk_category,
+        actual_severity: aiData.actual_severity || prev.actual_severity,
+        potential_severity: aiData.potential_severity || prev.potential_severity,
+        critical_incident: aiData.critical_incident || prev.critical_incident,
+      }));
+      setIsManualTitle(true);
+
+      setNotification({
+        type: 'success',
+        message: 'AI has analyzed the media and populated the form. Please review.'
+      });
+      setTimeout(() => setNotification(null), 5000);
+
+    } catch (err) {
+      setNotification({
+        type: 'error',
+        message: `AI Analysis failed: ${err.message}`
+      });
+      setTimeout(() => setNotification(null), 5000);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleAddInvolvedPerson = () => {
+    setInvolvedPersons([...involvedPersons, { worker_type: 'Select', name: 'Select', id: '', age: '', department: '', designation: '', particulars: '' }]);
+  };
+
+  const handleInvolvedPersonChange = (index, field, value) => {
+    const updated = [...involvedPersons];
+    updated[index][field] = value;
+    
+    // Auto-populate if name changes
+    if (field === 'name') {
+      const user = users.find(u => u.name === value);
+      if (user) {
+        updated[index].id = user.employee_id || '';
+        updated[index].department = user.department || 'Operations';
+        updated[index].designation = user.designation || 'Operator';
+        updated[index].person_id = user.id; // Store user ID
+      } else {
+        updated[index].person_id = null;
+      }
+    }
+    setInvolvedPersons(updated);
   };
 
   const SectionHeader = ({ title, isOpen, onToggle, hasCheckbox = true }) => (
@@ -273,7 +430,7 @@ const CreateIncident = () => {
   if (loading) {
     return (
       <div className="dashboard-loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', gap: '16px' }}>
-        <Loader2 className="animate-spin" size={48} color="#22d3ee" />
+        <Loader size={48} />
         <p style={{ color: '#64748b', fontSize: '18px' }}>Loading form data...</p>
       </div>
     );
@@ -396,6 +553,7 @@ const CreateIncident = () => {
 
                 <AppDropdown 
                   label="Risk Category"
+                  multi
                   required
                   error={errors.risk_category}
                   options={enums.risk_category}
@@ -504,13 +662,21 @@ const CreateIncident = () => {
                       <Eye size={16} className="field-icon" />
                     </div>
                  </div>
-                 <div className="form-field" style={{ gridColumn: 'span 2' }}>
+                  <div className="form-field" style={{ gridColumn: 'span 2' }}>
                     <label className="field-label">Incident Title</label>
                     <div className="field-input-wrapper">
-                      <input type="text" className="field-input" value={formData.incident_title} readOnly />
+                      <input 
+                        type="text" 
+                        className="field-input" 
+                        value={formData.incident_title} 
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, incident_title: e.target.value }));
+                          setIsManualTitle(true);
+                        }}
+                      />
                       <Eye size={16} className="field-icon" />
                     </div>
-                 </div>
+                  </div>
                  <div className="grid-2-inner" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', gridColumn: 'span 1' }}>
                     <div className="form-field">
                       <label className="field-label">Reportable</label>
@@ -555,30 +721,82 @@ const CreateIncident = () => {
             </div>
           </div>
 
+          {/* Work Activity Classification */}
+          <div className="incident-section">
+            <SectionHeader title="WORK ACTIVITY CLASSIFICATION" isOpen={openSections.work_activity} onToggle={() => toggleSection('work_activity')} />
+            {openSections.work_activity && (
+              <div className="section-content">
+                <div className="work-activity-radio-group">
+                   {['Work Related Incident', 'Non Work Related Incident', 'Third Party Incident'].map(option => (
+                     <label key={option} className="work-radio-option">
+                        <input 
+                          type="radio" 
+                          name="work_activity_classification"
+                          value={option}
+                          checked={formData.work_activity_classification === option}
+                          onChange={(e) => handleValueChange('work_activity_classification', e.target.value)}
+                        />
+                        <div className="custom-radio-circle"></div>
+                        <span className="radio-text">{option}</span>
+                     </label>
+                   ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Involved Sections */}
           <div className="incident-section">
             <SectionHeader title="INVOLVED PERSON" isOpen={openSections.involved} onToggle={() => toggleSection('involved')} />
             {openSections.involved && (
               <div className="section-content">
-                 <div className="grid-involved" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 0.8fr 0.5fr 1.5fr 1fr 1fr', gap: '8px', backgroundColor: '#f1f5f9', padding: '10px', borderRadius: '4px', marginBottom: '10px' }}>
+                 <div className="grid-involved-header">
                     {involvedHeaders.map(h => (
                       <span key={h} className="field-label">{h}</span>
                     ))}
                  </div>
-                 <div className="grid-involved" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 0.8fr 0.5fr 1.5fr 1fr 1fr', gap: '8px' }}>
-                    <AppDropdown placeholder="Select" options={['Regular', 'Contractor']} value="Select" onChange={()=>{}} />
-                    <AppDropdown placeholder="Select" options={users.map(u => u.name)} value="Select" onChange={()=>{}} />
-                    <input type="text" className="field-input" />
-                    <input type="text" className="field-input" />
-                    <input type="text" className="field-input" readOnly />
-                    <input type="text" className="field-input" readOnly />
-                    <div className="field-input-wrapper">
-                      <input type="text" className="field-input" readOnly />
-                      <Paperclip size={14} className="field-icon" />
-                    </div>
-                 </div>
+                 {involvedPersons.map((person, idx) => (
+                   <div key={idx} className="grid-involved-row">
+                      <AppDropdown 
+                        placeholder="Select" 
+                        options={['3rd Party', 'Contract', 'Employee', 'Visitor']} 
+                        value={person.worker_type} 
+                        onChange={(val) => handleInvolvedPersonChange(idx, 'worker_type', val)} 
+                      />
+                      <AppDropdown 
+                        placeholder="Select" 
+                        options={users.map(u => u.name)} 
+                        value={person.name} 
+                        onChange={(val) => handleInvolvedPersonChange(idx, 'name', val)} 
+                      />
+                      <input 
+                        type="text" 
+                        className="field-input" 
+                        value={person.id} 
+                        onChange={(e) => handleInvolvedPersonChange(idx, 'id', e.target.value)} 
+                      />
+                      <input 
+                        type="text" 
+                        className="field-input" 
+                        value={person.department} 
+                        onChange={(e) => handleInvolvedPersonChange(idx, 'department', e.target.value)} 
+                      />
+                      <input 
+                        type="text" 
+                        className="field-input" 
+                        value={person.designation} 
+                        onChange={(e) => handleInvolvedPersonChange(idx, 'designation', e.target.value)} 
+                      />
+                      <div className="involved-particulars-icons">
+                         <div className="p-icon-box"><Paperclip size={14} /><span>0</span></div>
+                         <div className="p-icon-box"><Languages size={14} /><span>0</span></div>
+                         <div className="p-icon-box"><Eye size={14} /><span>0</span></div>
+                         <div className="p-icon-edit"><Plus size={12} style={{ transform: 'rotate(45deg)' }} /></div>
+                      </div>
+                   </div>
+                 ))}
                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-                    <div className="add-btn"><Plus size={14} /> ADD</div>
+                    <div className="add-btn" onClick={handleAddInvolvedPerson}><Plus size={14} /> ADD</div>
                  </div>
               </div>
             )}
@@ -607,6 +825,115 @@ const CreateIncident = () => {
             </div>
           </div>
 
+          {/* Reported Person Section (Moved to end) */}
+          <div className="incident-section">
+            <SectionHeader title="REPORTED PERSON" isOpen={openSections.reported} onToggle={() => toggleSection('reported')} />
+            {openSections.reported && (
+              <div className="section-content">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Reported By */}
+                  <div className="reported-row">
+                    <div className="reported-label">Incident reported by</div>
+                    <div className="reported-toggles">
+                      <label className="toggle-option">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.reported_by_type === 'Me'} 
+                          onChange={() => {
+                            const user = users.find(u => u.name === 'Martin Debeloz');
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              reported_by_type: 'Me', 
+                              reported_by_id: user?.id || prev.reported_by_id,
+                              reported_by_name: user ? `${user.name} (${user.employee_id})` : prev.reported_by_name 
+                            }));
+                          }}
+                        />
+                        <div className="toggle-box"></div>
+                        <span>Me</span>
+                      </label>
+                      <label className="toggle-option">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.reported_by_type === 'Someone Else'} 
+                          onChange={() => setFormData(prev => ({ ...prev, reported_by_type: 'Someone Else' }))}
+                        />
+                        <div className="toggle-box"></div>
+                        <span>Someone Else</span>
+                      </label>
+                    </div>
+                    <div className="reported-dropdown">
+                      <AppDropdown 
+                        label="Person" 
+                        required 
+                        options={users.map(u => `${u.name} (${u.employee_id})`)}
+                        value={formData.reported_by_name || 'Select'}
+                        onChange={(val) => {
+                          const user = users.find(u => `${u.name} (${u.employee_id})` === val);
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            reported_by_id: user?.id, 
+                            reported_by_name: val,
+                            reported_by_type: 'Someone Else'
+                          }));
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Reported To */}
+                  <div className="reported-row">
+                    <div className="reported-label">Incident Reported to</div>
+                    <div className="reported-toggles">
+                      <label className="toggle-option">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.reported_to_type === 'Me'} 
+                          onChange={() => {
+                            const user = users.find(u => u.name === 'Martin Debeloz');
+                            setFormData(prev => ({ 
+                              ...prev, 
+                              reported_to_type: 'Me', 
+                              reported_to_id: user?.id || prev.reported_to_id,
+                              reported_to_name: user ? `${user.name} (${user.employee_id})` : prev.reported_to_name
+                            }));
+                          }}
+                        />
+                        <div className="toggle-box"></div>
+                        <span>Me</span>
+                      </label>
+                      <label className="toggle-option">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.reported_to_type === 'Someone Else'} 
+                          onChange={() => setFormData(prev => ({ ...prev, reported_to_type: 'Someone Else' }))}
+                        />
+                        <div className="toggle-box"></div>
+                        <span>Someone Else</span>
+                      </label>
+                    </div>
+                    <div className="reported-dropdown">
+                      <AppDropdown 
+                        label="Person" 
+                        options={users.map(u => `${u.name} (${u.employee_id})`)}
+                        value={formData.reported_to_name || 'Select'}
+                        onChange={(val) => {
+                          const user = users.find(u => `${u.name} (${u.employee_id})` === val);
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            reported_to_id: user?.id, 
+                            reported_to_name: val,
+                            reported_to_type: 'Someone Else'
+                          }));
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="form-footer">
             <button className="btn btn-cancel">CANCEL</button>
             <button className="btn btn-primary" onClick={() => setIsUploadModalOpen(true)}>UPLOAD</button>
@@ -619,8 +946,34 @@ const CreateIncident = () => {
           <UploadModal 
             isOpen={isUploadModalOpen} 
             onClose={() => setIsUploadModalOpen(false)} 
-            onUpload={(newAttr) => setAttachments(prev => [...prev, newAttr])}
+            onUpload={(newAttr) => {
+              setAttachments(prev => [...prev, newAttr]);
+            }} 
+            onAnalyze={handleAIAnalysis}
+            isAnalyzing={analyzing}
           />
+
+          {analyzing && (
+            <div className="ai-analyzing-overlay">
+              <div className="ai-loader-content">
+                <Loader size={48} className="spin" />
+                <h3>🤖 AI is analyzing your media...</h3>
+                <p>Generating incident title, description, and classifications.</p>
+              </div>
+            </div>
+          )}
+
+          {notification && (
+            <div className={`notification-toast ${notification.type}`}>
+              <div className="toast-icon">
+                {notification.type === 'success' ? '✓' : '!'}
+              </div>
+              <div className="toast-content">
+                <div className="toast-title">{notification.message}</div>
+                {notification.ref && <div className="toast-ref">Ref: {notification.ref}</div>}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
@@ -633,33 +986,62 @@ const CreateIncident = () => {
 /**
  * High-fidelity Upload Modal
  */
-const UploadModal = ({ isOpen, onClose, onUpload }) => {
-  const [file, setFile] = useState(null);
+const UploadModal = ({ isOpen, onClose, onUpload, onAnalyze, isAnalyzing }) => {
+  const [files, setFiles] = useState([]);
   const [description, setDescription] = useState('');
-  const [preview, setPreview] = useState(null);
+  const [previews, setPreviews] = useState([]);
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(selectedFile);
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 0) {
+      setFiles(prev => [...prev, ...selectedFiles]);
+      
+      selectedFiles.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setPreviews(prev => [...prev, { name: file.name, type: 'image', url: reader.result }]);
+          };
+          reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+          setPreviews(prev => [...prev, { name: file.name, type: 'video', url: 'video_placeholder' }]);
+        } else if (file.type.startsWith('audio/')) {
+          setPreviews(prev => [...prev, { name: file.name, type: 'audio', url: 'audio_placeholder' }]);
+        }
+      });
     }
   };
 
-  const handleSubmit = () => {
-    if (file && preview) {
-      onUpload({
-        file_name: file.name,
-        file_url: preview, // Base64 data
-        description
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleModalSubmit = () => {
+    if (files.length > 0) {
+      files.forEach((file, idx) => {
+        const p = previews[idx];
+        onUpload({
+          file_name: file.name,
+          file_url: (p.url === 'video_placeholder' || p.url === 'audio_placeholder') ? (p.type) : p.url,
+          description: idx === 0 ? description : '' // Only attach desc to first if batching
+        });
       });
-      setFile(null);
-      setPreview(null);
+      setFiles([]);
+      setPreviews([]);
+      setDescription('');
+      onClose();
+    }
+  };
+
+  const handleAIButtonClick = async () => {
+    if (files.length > 0) {
+      await onAnalyze(files, description);
+      setFiles([]);
+      setPreviews([]);
       setDescription('');
       onClose();
     }
@@ -683,18 +1065,29 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
             type="file" 
             ref={fileInputRef}
             hidden 
-            accept="image/*"
+            multiple
+            accept="image/*,video/*,audio/*"
             onChange={handleFileChange}
           />
           <div className="dropzone-content">
             <Paperclip size={24} color="#94a3b8" />
-            <p>{file ? file.name : 'Browse file or drag and drop your file'}</p>
+            <p>{files.length > 0 ? `${files.length} file(s) selected` : 'Browse files or drag and drop your files'}</p>
           </div>
         </div>
 
-        {preview && (
-          <div className="upload-preview-container">
-            <img src={preview} alt="Upload preview" className="upload-preview-img" />
+        {previews.length > 0 && (
+          <div className="upload-previews-gallery">
+            {previews.map((p, idx) => (
+              <div key={idx} className="mini-preview-card">
+                <div className="remove-preview" onClick={(e) => { e.stopPropagation(); removeFile(idx); }}>
+                  <Plus size={12} style={{ transform: 'rotate(45deg)' }} />
+                </div>
+                {p.type === 'image' && <img src={p.url} alt="Preview" />}
+                {p.type === 'video' && <Play size={24} color="#94a3b8" />}
+                {p.type === 'audio' && <Mic size={24} color="#00c4f4" />}
+                <span className="file-name-tag">{p.name}</span>
+              </div>
+            ))}
           </div>
         )}
 
@@ -717,8 +1110,11 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
         </div>
 
         <div className="modal-footer">
-          <button className="modal-btn modal-btn-cancel" onClick={onClose}>CANCEL</button>
-          <button className="modal-btn modal-btn-submit" onClick={handleSubmit} disabled={!file}>SUBMIT</button>
+          <button className="modal-btn modal-btn-cancel" onClick={onClose} disabled={isAnalyzing}>CANCEL</button>
+          <button className="modal-btn modal-btn-ai" onClick={handleAIButtonClick} disabled={files.length === 0 || isAnalyzing}>
+            {isAnalyzing ? 'ANALYZING...' : '🤖 AI ANALYSIS'}
+          </button>
+          <button className="modal-btn modal-btn-submit" onClick={handleModalSubmit} disabled={files.length === 0 || isAnalyzing}>SUBMIT</button>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import TrendDashboard from './components/trend/TrendDashboard';
 import CreateIncident from './components/incident/CreateIncident';
 import IncidentListing from './components/incident/IncidentListing';
 import IncidentReview from './components/incident/IncidentReview';
+import IncidentReviewPage from './components/incident/IncidentReviewPage';
 import IncidentInspection from './components/incident/IncidentInspection';
 import IncidentInvestigation from './components/incident/IncidentInvestigation';
 import RootCauseAnalysis from './components/incident/RootCauseAnalysis';
@@ -28,44 +29,58 @@ import DensityReport from './components/observation/reports/DensityReport';
 import ListReport from './components/observation/reports/ListReport';
 import PerformanceReport from './components/observation/reports/PerformanceReport';
 import ChatAI from './components/chat/ChatAI';
+import LiveTwin from './components/digital_twin/LiveTwin';
 
 function App() {
   return (
     <BrowserRouter>
-      <DashboardLayout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/incident/dashboard" element={<Dashboard />} />
-          <Route path="/incident/trend" element={<TrendDashboard />} />
-          <Route path="/incident/create-new-incident" element={<CreateIncident />} />
-          <Route path="/incident/listing" element={<IncidentListing />} />
-          <Route path="/incident/review" element={<IncidentReview />} />
-          <Route path="/incident/inspection-listing" element={<IncidentInspection />} />
-          <Route path="/incident/investigation" element={<IncidentInvestigation />} />
-          <Route path="/incident/root-cause-analysis" element={<RootCauseAnalysis />} />
-          <Route path="/incident/resolution" element={<IncidentResolution />} />
-          <Route path="/incident/action" element={<IncidentAction />} />
-          <Route path="/incident/workflow" element={<IncidentWorkflow />} />
-          <Route path="/observation/dashboard" element={<ObservationDashboard />} />
-          <Route path="/observation/create-new-observation" element={<CreateObservation />} />
-          <Route path="/observation/listing" element={<ObservationListing />} />
-          <Route path="/observation/inspection" element={<ObservationInspection />} />
-          <Route path="/observation/closure" element={<ObservationClosure />} />
-          <Route path="/observation/review" element={<ObservationReview />} />
-          <Route path="/observation/review/:id" element={<ObservationDetailView />} />
-          <Route path="/observation/action" element={<ObservationAction />} />
-          <Route path="/observation/root-cause" element={<ObservationRCA />} />
-          <Route path="/observation/analyser" element={<ObservationAnalyzer />} />
-          <Route path="/observation/workflow" element={<ObservationWorkflow />} />
-          <Route path="/observation/observation-log" element={<ObservationLog />} />
-          <Route path="/observation/reports/density-report" element={<DensityReport />} />
-          <Route path="/observation/reports/observation-list" element={<ListReport />} />
-          <Route path="/observation/reports/observer-performance" element={<PerformanceReport />} />
-          <Route path="/observation/configuration" element={<ObservationConfiguration />} />
-          <Route path="/chat-ai" element={<ChatAI />} />
-        </Routes>
-      </DashboardLayout>
+      <Routes>
+        <Route path="/digital-twin" element={<LiveTwin />} />
+        <Route path="*" element={
+          <DashboardLayout>
+            <Routes>
+              {/* Dashboard & Trends */}
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/incident/dashboard" element={<Dashboard />} />
+              <Route path="/incident/trend" element={<TrendDashboard />} />
+
+              {/* Incidents */}
+              <Route path="/incident/create-new-incident" element={<CreateIncident />} />
+              <Route path="/incident/listing" element={<IncidentListing />} />
+              <Route path="/incident/review" element={<IncidentReview />} />
+              <Route path="/incident/review/:id" element={<IncidentReviewPage />} />
+              <Route path="/incident/inspection-listing" element={<IncidentInspection />} />
+              <Route path="/incident/investigation" element={<IncidentInvestigation />} />
+              <Route path="/incident/root-cause-analysis" element={<RootCauseAnalysis />} />
+              <Route path="/incident/resolution" element={<IncidentResolution />} />
+              <Route path="/incident/action" element={<IncidentAction />} />
+              <Route path="/incident/workflow" element={<IncidentWorkflow />} />
+
+              {/* Observations */}
+              <Route path="/observation/dashboard" element={<ObservationDashboard />} />
+              <Route path="/observation/create-new-observation" element={<CreateObservation />} />
+              <Route path="/observation/listing" element={<ObservationListing />} />
+              <Route path="/observation/inspection" element={<ObservationInspection />} />
+              <Route path="/observation/closure" element={<ObservationClosure />} />
+              <Route path="/observation/review" element={<ObservationReview />} />
+              <Route path="/observation/review/:id" element={<ObservationDetailView />} />
+              <Route path="/observation/action" element={<ObservationAction />} />
+              <Route path="/observation/root-cause" element={<ObservationRCA />} />
+              <Route path="/observation/analyser" element={<ObservationAnalyzer />} />
+              <Route path="/observation/workflow" element={<ObservationWorkflow />} />
+              <Route path="/observation/observation-log" element={<ObservationLog />} />
+              <Route path="/observation/reports/density-report" element={<DensityReport />} />
+              <Route path="/observation/reports/observation-list" element={<ListReport />} />
+              <Route path="/observation/reports/observer-performance" element={<PerformanceReport />} />
+              <Route path="/observation/configuration" element={<ObservationConfiguration />} />
+              
+              {/* Chatbot */}
+              <Route path="/chat-ai" element={<ChatAI />} />
+            </Routes>
+          </DashboardLayout>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 }

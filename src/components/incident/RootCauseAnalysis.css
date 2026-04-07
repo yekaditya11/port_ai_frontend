@@ -39,7 +39,7 @@
 }
 
 .toggle-label-rca.active {
-  color: #22d3ee;
+  color: var(--brand-cyan, #00c4f4);
 }
 
 .toggle-switch-rca {
@@ -52,7 +52,7 @@
 }
 
 .toggle-switch-rca.on {
-  background-color: #22d3ee;
+  background-color: var(--brand-cyan, #00c4f4);
 }
 
 .switch-knob-rca {
@@ -73,6 +73,8 @@
 /* Table */
 .rca-table-wrapper {
   overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 480px;
   width: 100%;
   background-color: #fff;
 }
@@ -108,7 +110,7 @@
 }
 
 .cell-id, .cell-rca-id {
-  color: #22d3ee !important;
+  color: var(--brand-cyan, #00c4f4) !important;
   cursor: pointer;
 }
 
@@ -120,7 +122,7 @@
 }
 
 .expand-arraw {
-  color: #22d3ee;
+  color: var(--brand-cyan, #00c4f4);
   cursor: pointer;
   transition: transform 0.2s;
 }

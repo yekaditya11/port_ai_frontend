@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
@@ -7,36 +8,59 @@ import {
   AlertTriangle, 
   MoreVertical,
   ChevronDown,
-  Calendar,
-  Loader2
+  Calendar
 } from 'lucide-react';
+import Loader from '../common/Loader';
+import DateRangePicker from '../common/DateRangePicker';
 import { api } from '../../services/api';
+import { useRef } from 'react';
 import './IncidentListing.css';
 
 const IncidentListing = ({ status: propStatus }) => {
+  const navigate = useNavigate();
   const [expandedId, setExpandedId] = useState(null);
-  const [showCalendar, setShowCalendar] = useState(false);
   const [incidents, setIncidents] = useState([]);
+  const [enums, setEnums] = useState({});
+  const [incidentRefs, setIncidentRefs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [openFilter, setOpenFilter] = useState(null);
+  const filterContainerRef = useRef(null);
   
   // Filters
-  const [filters] = useState({
+  const [filters, setFilters] = useState({
     status: propStatus || '',
+    incident_ref: '',
     incident_type: '',
     incident_group: '',
-    shift: ''
+    shift: '',
+    start_date: '',
+    end_date: ''
   });
 
   const fetchIncidents = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getIncidents({
-        ...filters,
+      // Create a clean params object, mapping 'incident_ref' if present
+      const params = {
         page,
-        page_size: 20
+        page_size: 6,
+        status: filters.status,
+        incident_type: filters.incident_type !== 'Select' ? filters.incident_type : '',
+        incident_group: filters.incident_group !== 'Select' ? filters.incident_group : '',
+        shift: filters.shift !== 'Select' ? filters.shift : '',
+        incident_ref: filters.incident_ref,
+        start_date: filters.start_date,
+        end_date: filters.end_date
+      };
+
+      // Remove empty strings
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null) delete params[key];
       });
+
+      const data = await api.getIncidents(params);
       setIncidents(data.items);
       setTotal(data.total);
     } catch (err) {
@@ -47,8 +71,43 @@ const IncidentListing = ({ status: propStatus }) => {
   }, [filters, page]);
 
   useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const [enumData, refData] = await Promise.all([
+          api.getEnumsAll(),
+          api.getIncidentRefs()
+        ]);
+        setEnums(enumData);
+        setIncidentRefs(refData);
+      } catch (err) {
+        console.error('Failed to load initial data:', err);
+      }
+    };
+    loadInitialData();
+  }, []);
+
+  useEffect(() => {
     fetchIncidents();
   }, [fetchIncidents]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterContainerRef.current && !filterContainerRef.current.contains(event.target)) {
+        setOpenFilter(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleFilterChange = (name, value) => {
+    setFilters(prev => ({ ...prev, [name]: value }));
+    setPage(1); // Reset to first page when filtering
+  };
+
+  const toggleFilter = (name) => {
+    setOpenFilter(openFilter === name ? null : name);
+  };
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
@@ -62,15 +121,7 @@ const IncidentListing = ({ status: propStatus }) => {
     </div>
   );
 
-  const FilterGroup = ({ label, value }) => (
-    <div className="filter-group">
-      <div className="filter-inner">
-        <label className="filter-label">{label}</label>
-        <div className="filter-value">{value || 'Select'}</div>
-      </div>
-      <ChevronDown size={14} className="select-icon" />
-    </div>
-  );
+
 
   const getSeverityType = (severity) => {
     if (!severity) return 'minor';
@@ -84,7 +135,7 @@ const IncidentListing = ({ status: propStatus }) => {
     <div className="dashboard-layout-main" style={{ backgroundColor: '#f1f5f9' }}>
       {!propStatus && (
         <div style={{ padding: '0 24px', marginTop: '20px' }}>
-           <div className="new-incident-btn">
+           <div className="new-incident-btn" onClick={() => navigate('/incident/create-new-incident')}>
               <Plus size={16} /> NEW INCIDENT
            </div>
         </div>
@@ -93,23 +144,125 @@ const IncidentListing = ({ status: propStatus }) => {
       <div className="content-padding" style={{ paddingTop: '10px' }}>
         <div className="incident-listing-container">
           
-          <div className="listing-toolbar">
+          <div className="listing-toolbar" ref={filterContainerRef}>
             <div className="toolbar-filters">
-              <FilterGroup label="Incident ID" />
-              <FilterGroup label="Incident Type" />
-              <FilterGroup label="Incident Group" />
-              <FilterGroup label="Shift" />
-              <div className="filter-group" style={{ position: 'relative', flex: '1.2' }} onClick={() => setShowCalendar(!showCalendar)}>
-                 <div className="filter-inner">
-                    <label className="filter-label">Date Range</label>
-                    <div className="filter-value">Select Range</div>
-                 </div>
-                 <div className="date-icons">
-                    <span className="clear-icon" style={{ fontSize: '14px', marginRight: '5px' }}>×</span>
-                    <Calendar size={14} className="calendar-icon" />
-                    <ChevronDown size={14} className="select-icon-relative" />
-                 </div>
+              {/* Incident ID Filter - Dropdown */}
+              <div className={`filter-group ${openFilter === 'id' ? 'is-open' : ''}`} onClick={() => toggleFilter('id')}>
+                <div className="filter-inner">
+                  <label className="filter-label">Incident ID</label>
+                  <div className="filter-value">{filters.incident_ref || 'Select'}</div>
+                </div>
+                <ChevronDown size={14} className="select-icon" />
+                {openFilter === 'id' && (
+                  <div className="filter-dropdown-menu">
+                    <div className="filter-option" onClick={() => handleFilterChange('incident_ref', '')}>All IDs</div>
+                    {incidentRefs.map(ref => (
+                      <div key={ref} className="filter-option" onClick={() => handleFilterChange('incident_ref', ref)}>{ref}</div>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Types Filter */}
+              <div className={`filter-group ${openFilter === 'type' ? 'is-open' : ''}`} onClick={() => toggleFilter('type')}>
+                <div className="filter-inner">
+                  <label className="filter-label">Incident Type</label>
+                  <div className="filter-value">{filters.incident_type || 'Select'}</div>
+                </div>
+                <ChevronDown size={14} className="select-icon" />
+                {openFilter === 'type' && (
+                  <div className="filter-dropdown-menu">
+                    <div className="filter-option" onClick={() => handleFilterChange('incident_type', '')}>All Types</div>
+                    {enums.incident_type?.map(opt => {
+                      const label = typeof opt === 'object' ? opt.value : opt;
+                      return (
+                        <div key={label} className="filter-option" onClick={() => handleFilterChange('incident_type', label)}>{label}</div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Groups Filter */}
+              <div className={`filter-group ${openFilter === 'group' ? 'is-open' : ''}`} onClick={() => toggleFilter('group')}>
+                <div className="filter-inner">
+                  <label className="filter-label">Incident Group</label>
+                  <div className="filter-value">{filters.incident_group || 'Select'}</div>
+                </div>
+                <ChevronDown size={14} className="select-icon" />
+                {openFilter === 'group' && (
+                  <div className="filter-dropdown-menu">
+                    <div className="filter-option" onClick={() => handleFilterChange('incident_group', '')}>All Groups</div>
+                    {enums.incident_group?.map(opt => {
+                      const label = typeof opt === 'object' ? opt.value : opt;
+                      return (
+                        <div key={label} className="filter-option" onClick={() => handleFilterChange('incident_group', label)}>{label}</div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Shift Filter */}
+              <div className={`filter-group ${openFilter === 'shift' ? 'is-open' : ''}`} onClick={() => toggleFilter('shift')}>
+                <div className="filter-inner">
+                  <label className="filter-label">Shift</label>
+                  <div className="filter-value">{filters.shift || 'Select'}</div>
+                </div>
+                <ChevronDown size={14} className="select-icon" />
+                {openFilter === 'shift' && (
+                  <div className="filter-dropdown-menu">
+                    <div className="filter-option" onClick={() => handleFilterChange('shift', '')}>All Shifts</div>
+                    {enums.shift?.map(opt => {
+                      const label = typeof opt === 'object' ? opt.value : opt;
+                      return (
+                        <div key={label} className="filter-option" onClick={() => handleFilterChange('shift', label)}>{label}</div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Date Range Filter */}
+              <div className={`filter-group ${openFilter === 'date' ? 'is-open' : ''}`} style={{ flex: '1.5' }} onClick={() => toggleFilter('date')}>
+                <div className="filter-inner">
+                  <label className="filter-label">Date Range</label>
+                  <div className="filter-value">
+                    {filters.start_date || filters.end_date 
+                      ? `${filters.start_date ? new Date(filters.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '...'} | ${filters.end_date ? new Date(filters.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '...'}`
+                      : 'Select Range'}
+                  </div>
+                </div>
+                <div className="date-icons">
+                  {(filters.start_date || filters.end_date) && (
+                    <span 
+                      className="clear-icon" 
+                      style={{ fontSize: '14px', marginRight: '5px', cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFilterChange('start_date', '');
+                        handleFilterChange('end_date', '');
+                      }}
+                    >×</span>
+                  )}
+                  <Calendar size={14} className="calendar-icon" />
+                  <ChevronDown size={14} className="select-icon-relative" />
+                </div>
+
+                {openFilter === 'date' && (
+                  <DateRangePicker 
+                    startDate={filters.start_date ? new Date(filters.start_date) : null}
+                    endDate={filters.end_date ? new Date(filters.end_date) : null}
+                    onSelect={(start, end) => {
+                      if (start) handleFilterChange('start_date', start.toISOString().split('T')[0]);
+                      if (end) handleFilterChange('end_date', end.toISOString().split('T')[0]);
+                      else handleFilterChange('end_date', '');
+                    }}
+                    onClose={() => setOpenFilter(null)}
+                  />
+                )}
+              </div>
+
               <button className="btn-search" onClick={fetchIncidents}>SEARCH</button>
             </div>
           </div>
@@ -127,7 +280,7 @@ const IncidentListing = ({ status: propStatus }) => {
           <div className="incident-list">
             {loading ? (
               <div style={{ padding: '40px', textAlign: 'center' }}>
-                <Loader2 className="animate-spin" size={32} color="#22d3ee" style={{ margin: '0 auto' }} />
+                <Loader size={32} style={{ margin: '0 auto' }} />
                 <p style={{ marginTop: '10px', color: '#64748b' }}>Fetching incidents...</p>
               </div>
             ) : incidents.length === 0 ? (
@@ -140,7 +293,7 @@ const IncidentListing = ({ status: propStatus }) => {
                     <div className={`incident-card ${expandedId === incident.id ? 'is-expanded' : ''}`}>
                       <div className="card-column">
                         <div className="item-title">{incident.incident_title}</div>
-                        <div className="item-id">
+                        <div className="item-id" onClick={() => navigate(`/incident/review/${incident.id}`)} style={{ cursor: 'pointer', color: 'var(--brand-cyan, #00c4f4)' }}>
                           {incident.incident_ref}
                           <Monitor size={14} />
                         </div>
@@ -190,7 +343,7 @@ const IncidentListing = ({ status: propStatus }) => {
                         <ChevronDown 
                           size={14} 
                           style={{ 
-                            color: '#22d3ee', 
+                            color: 'var(--brand-cyan, #00c4f4)', 
                             marginTop: '8px', 
                             cursor: 'pointer',
                             transform: expandedId === incident.id ? 'rotate(180deg)' : 'none',

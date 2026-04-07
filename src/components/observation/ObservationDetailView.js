@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  MapPin, Clock, ChevronDown, Plus, Trash2, Edit,
+  MapPin, ChevronDown,
   SaveAll, AlertTriangle,
-  Loader2, ArrowLeft, Check, X, Sparkles
+  Loader2, ArrowLeft, Check, Sparkles
 } from 'lucide-react';
 import { api } from '../../services/api';
 import './ObservationDetailView.css';
@@ -16,8 +16,15 @@ const ObservationDetailView = () => {
   const [obs, setObs]           = useState(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
-  const [saving, setSaving]     = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
+  const showToast = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
 
   // Review form state
   const [reviewMode, setReviewMode]       = useState('NEAR_MISS'); // 'NEAR_MISS' | 'INCIDENT'
@@ -79,20 +86,7 @@ const ObservationDetailView = () => {
   const val = (v) => v || '--';
 
   // ── UNSAFE ABC row handlers ───────────────────────────────────────────
-  const addRow = () => setUnsafeAbcRows(prev => [...prev, { primaryFactor:'', precondition:'', underlyingCause:'', cause:'' }]);
-  const removeRow = (i) => {
-    setUnsafeAbcRows(prev => prev.filter((_, idx) => idx !== i));
-    // Clean up factor options for removed row and re-index
-    setRowFactorOptions(prev => {
-      const next = {};
-      Object.keys(prev).forEach(key => {
-        const k = Number(key);
-        if (k < i) next[k] = prev[k];
-        else if (k > i) next[k - 1] = prev[k];
-      });
-      return next;
-    });
-  };
+
   const updateRow = (i, field, value) => {
     setUnsafeAbcRows(prev => prev.map((r, idx) => {
       if (idx !== i) return r;
@@ -142,7 +136,7 @@ const ObservationDetailView = () => {
         }
       }
     } catch (err) {
-      alert(`AI configuration failed: ${err.message}`);
+      showToast(`AI configuration failed: ${err.message}`, 'error');
     } finally {
       setIsAiLoading(false);
     }
@@ -158,9 +152,11 @@ const ObservationDetailView = () => {
         next_action: nextAction,
         unsafe_abc: unsafeAbcRows,
       });
-      alert('Review saved successfully!');
+      showToast('✅ Review saved successfully!', 'success');
+      // Navigate back to listing after 2s to show success toast
+      setTimeout(() => navigate('/observation/listing'), 2000);
     } catch (err) {
-      alert(`Failed to save: ${err.message}`);
+      showToast(`Failed to save: ${err.message}`, 'error');
     } finally {
       setSaving(false);
     }
@@ -184,6 +180,11 @@ const ObservationDetailView = () => {
 
   return (
     <div className="odv-container">
+      {toastMessage && (
+        <div className={`custom-toast ${toastType === 'error' ? 'error' : ''}`}>
+          {toastMessage}
+        </div>
+      )}
 
       {/* ── Summary header row ──────────────────────────────────────────── */}
       <div className="odv-summary-bar">

@@ -1,15 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
-  ChevronDown, Search, Filter, Settings, 
-  Calendar, Clock, CheckCircle2, AlertCircle,
-  ChevronUp
+  ChevronDown, Search, Settings, 
+  Calendar, Clock,
+  ChevronUp, X
 } from 'lucide-react';
 import './ObservationWorkflow.css';
+import DateRangePicker from '../common/DateRangePicker';
 
 const ObservationWorkflow = () => {
-  const fromInputRef = useRef(null);
-  const toInputRef = useRef(null);
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [filterDates, setFilterDates] = useState({
     from: '2026-06-01',
     to: '2026-04-05'
@@ -20,7 +20,7 @@ const ObservationWorkflow = () => {
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${year}`;
   };
-  const [workflowData, setWorkflowData] = useState([
+  const [workflowData] = useState([
     {
       id: "OBR/0326/3906",
       group: "Assets",
@@ -124,33 +124,30 @@ const ObservationWorkflow = () => {
                 <ChevronDown size={14} className="select-chevron" />
               </div>
             </div>
-            <div className="workflow-filter-box date-box" onClick={() => fromInputRef.current?.showPicker()}>
-              <input 
-                ref={fromInputRef}
-                type="date" 
-                className="hidden-date-input"
-                value={filterDates.from}
-                onChange={(e) => setFilterDates({ ...filterDates, from: e.target.value })}
-              />
-              <label>From Date</label>
+            <div className="workflow-filter-box date-box" style={{ position: 'relative' }} onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}>
+              <label>Date Range</label>
               <div className="date-display-wrapper">
-                <span className="date-text">{formatDateDisplay(filterDates.from)}</span>
-                <Calendar size={14} className="input-icon" />
+                <span className="date-text">
+                  {filterDates.from ? formatDateDisplay(filterDates.from) : '...'} | {filterDates.to ? formatDateDisplay(filterDates.to) : '...'}
+                </span>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                   <X size={14} className="input-icon" onClick={(e) => { e.stopPropagation(); setFilterDates({from: '', to: ''}); }} />
+                   <Calendar size={14} className="input-icon" />
+                </div>
               </div>
-            </div>
-            <div className="workflow-filter-box date-box" onClick={() => toInputRef.current?.showPicker()}>
-              <input 
-                ref={toInputRef}
-                type="date" 
-                className="hidden-date-input"
-                value={filterDates.to}
-                onChange={(e) => setFilterDates({ ...filterDates, to: e.target.value })}
-              />
-              <label>To Date</label>
-              <div className="date-display-wrapper">
-                <span className="date-text">{formatDateDisplay(filterDates.to)}</span>
-                <Calendar size={14} className="input-icon" />
-              </div>
+              {isDatePickerOpen && (
+                <DateRangePicker 
+                  startDate={filterDates.from ? new Date(filterDates.from) : null}
+                  endDate={filterDates.to ? new Date(filterDates.to) : null}
+                  onSelect={(start, end) => {
+                    setFilterDates({
+                      from: start ? start.toISOString().split('T')[0] : '',
+                      to: end ? end.toISOString().split('T')[0] : ''
+                    });
+                  }}
+                  onClose={() => setIsDatePickerOpen(false)}
+                />
+              )}
             </div>
             <div className="filter-actions-right">
                 <div className="expand-toggle" onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}>

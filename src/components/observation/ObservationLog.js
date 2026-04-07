@@ -4,6 +4,7 @@ import {
   Calendar, X, ChevronUp, ArrowUpDown
 } from 'lucide-react';
 import './ObservationLog.css';
+import DateRangePicker from '../common/DateRangePicker';
 
 const ObservationLog = () => {
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
@@ -71,25 +72,17 @@ const ObservationLog = () => {
               </div>
             </div>
             {isDatePickerOpen && (
-              <div className="date-picker-popover" onClick={(e) => e.stopPropagation()}>
-                <div className="popover-row">
-                  <label>From Date</label>
-                  <input 
-                    type="date" 
-                    value={filterDates.from} 
-                    onChange={(e) => setFilterDates({...filterDates, from: e.target.value})} 
-                  />
-                </div>
-                <div className="popover-row">
-                  <label>To Date</label>
-                  <input 
-                    type="date" 
-                    value={filterDates.to} 
-                    onChange={(e) => setFilterDates({...filterDates, to: e.target.value})} 
-                  />
-                </div>
-                <button className="popover-close-btn" onClick={() => setIsDatePickerOpen(false)}>Apply</button>
-              </div>
+              <DateRangePicker 
+                startDate={filterDates.from ? new Date(filterDates.from) : null}
+                endDate={filterDates.to ? new Date(filterDates.to) : null}
+                onSelect={(start, end) => {
+                  setFilterDates({
+                    from: start ? start.toISOString().split('T')[0] : '',
+                    to: end ? end.toISOString().split('T')[0] : ''
+                  });
+                }}
+                onClose={() => setIsDatePickerOpen(false)}
+              />
             )}
           </div>
 

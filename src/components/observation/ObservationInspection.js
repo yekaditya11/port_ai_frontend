@@ -5,7 +5,7 @@ import {
   MapPin, Clock, MoreVertical, Monitor, X
 } from 'lucide-react';
 import './ObservationInspection.css';
-import '../common/DateRangePicker.css';
+import DateRangePicker from '../common/DateRangePicker';
 
 const ObservationInspection = () => {
   const navigate = useNavigate();
@@ -217,26 +217,17 @@ const ObservationInspection = () => {
             </div>
             <ChevronDown size={12} className="obs-insp-filter-box-arrow" />
             {isDatePickerOpen && (
-              <div className="date-range-popover" onClick={(e) => e.stopPropagation()}>
-                <div className="date-range-popover-row">
-                  <span className="date-range-label">From Date</span>
-                  <input 
-                    type="date" 
-                    className="date-range-input" 
-                    value={filterDates.from}
-                    onChange={(e) => setFilterDates({ ...filterDates, from: e.target.value })}
-                  />
-                </div>
-                <div className="date-range-popover-row">
-                  <span className="date-range-label">To Date</span>
-                  <input 
-                    type="date" 
-                    className="date-range-input" 
-                    value={filterDates.to}
-                    onChange={(e) => setFilterDates({ ...filterDates, to: e.target.value })}
-                  />
-                </div>
-              </div>
+              <DateRangePicker 
+                startDate={filterDates.from ? new Date(filterDates.from) : null}
+                endDate={filterDates.to ? new Date(filterDates.to) : null}
+                onSelect={(start, end) => {
+                  setFilterDates({
+                    from: start ? start.toISOString().split('T')[0] : '',
+                    to: end ? end.toISOString().split('T')[0] : ''
+                  });
+                }}
+                onClose={() => setIsDatePickerOpen(false)}
+              />
             )}
           </div>
           

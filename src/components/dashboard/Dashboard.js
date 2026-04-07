@@ -5,7 +5,8 @@ import WorkAreaList from './WorkAreaList';
 import OverviewTable from './OverviewTable';
 import AccidentsChart from './AccidentsChart';
 import StatusChart from './StatusChart';
-import { Calendar, ChevronDown, Loader2 } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
+import Loader from '../common/Loader';
 import { api } from '../../services/api';
 import './Dashboard.css';
 
@@ -36,7 +37,7 @@ const Dashboard = () => {
   if (loading && !stats) {
     return (
       <div className="dashboard-loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', gap: '16px' }}>
-        <Loader2 className="animate-spin" size={48} color="#22d3ee" />
+        <Loader size={48} />
         <p style={{ color: '#64748b', fontSize: '18px' }}>Loading dashboard data...</p>
       </div>
     );

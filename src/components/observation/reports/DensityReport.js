@@ -3,11 +3,16 @@ import {
   ChevronDown, ChevronUp, Calendar, Search, MoreVertical
 } from 'lucide-react';
 import './DensityReport.css';
+import DateRangePicker from '../../common/DateRangePicker';
+import { X } from 'lucide-react';
 
 const DensityReport = () => {
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
-  const [fromDate, setFromDate] = useState('2026-06-01');
-  const [toDate, setToDate] = useState('2026-05-04');
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [filterDates, setFilterDates] = useState({
+    from: '2026-06-01',
+    to: '2026-05-04'
+  });
 
   const reportData = [
     { id: 'OBR/0326/3906', date: '31 Mar 2026 | 16:16', area: 'Auxiliary facilities' },
@@ -55,29 +60,30 @@ const DensityReport = () => {
               <ChevronDown size={14} className="select-chevron" />
             </div>
           </div>
-          <div className="report-filter-box flex-33">
-            <label>From Date</label>
+          <div className="report-filter-box date-range-picker-trigger" style={{ flex: 1.5, position: 'relative' }} onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}>
+            <label>Date Range</label>
             <div className="date-input-wrapper">
-              <input 
-                type="date" 
-                className="date-input" 
-                value={fromDate} 
-                onChange={(e) => setFromDate(e.target.value)} 
-              />
-              <Calendar size={14} className="date-icon" />
+              <span className="date-display-text">
+                {filterDates.from ? new Date(filterDates.from).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '...'} | {filterDates.to ? new Date(filterDates.to).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '...'}
+              </span>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <X size={14} className="date-icon" onClick={(e) => { e.stopPropagation(); setFilterDates({from: '', to: ''}); }} />
+                <Calendar size={14} className="date-icon" />
+              </div>
             </div>
-          </div>
-          <div className="report-filter-box flex-33">
-            <label>To Date</label>
-            <div className="date-input-wrapper">
-              <input 
-                type="date" 
-                className="date-input" 
-                value={toDate} 
-                onChange={(e) => setToDate(e.target.value)} 
+            {isDatePickerOpen && (
+              <DateRangePicker 
+                startDate={filterDates.from ? new Date(filterDates.from) : null}
+                endDate={filterDates.to ? new Date(filterDates.to) : null}
+                onSelect={(start, end) => {
+                  setFilterDates({
+                    from: start ? start.toISOString().split('T')[0] : '',
+                    to: end ? end.toISOString().split('T')[0] : ''
+                  });
+                }}
+                onClose={() => setIsDatePickerOpen(false)}
               />
-              <Calendar size={14} className="date-icon" />
-            </div>
+            )}
           </div>
           <div className="expand-toggle" onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}>
             {isFiltersExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}

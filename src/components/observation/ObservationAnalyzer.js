@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { 
-  ChevronDown, Search, X, Settings, 
-  MoreVertical, Info, LayoutGrid, Calendar,
-  MessageSquare, Users, Globe, Bell, HelpCircle, Power
+  ChevronDown, X, Settings, 
+  MoreVertical, Info
 } from 'lucide-react';
 import './ObservationAnalyzer.css';
 
 const ObservationAnalyzer = () => {
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [dateRange, setDateRange] = useState('180 Days');
-  const [listData, setListData] = useState([
+  const [listData] = useState([
     {
       id: "OBR/0326/3906",
       group: "Assets",

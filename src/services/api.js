@@ -45,6 +45,11 @@ export const api = {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   }),
+  updateIncident: (id, data) => apiFetch(`/incidents/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  getIncidentRefs: () => apiFetch('/incidents/refs'),
 
   // Observations
   getObservations: (params = {}) => {
@@ -132,10 +137,34 @@ export const api = {
   // Observation Review Factors (UNSAFE ABC)
   getPrimaryFactors: () => apiFetch('/observation-factors/primary'),
   getFactorOptions: (primaryId) => apiFetch(`/observation-factors/${primaryId}`),
-
   // Chatbot
   chatbotQuery: (message) => apiFetch('/chatbot/query', {
     method: 'POST',
     body: JSON.stringify({ message }),
   }),
+
+  // AI Analysis — sends multipart/form-data, no JSON header
+  analyzeIncidentMedia: (files, description = '') => {
+    const formData = new FormData();
+    if (Array.isArray(files)) {
+      files.forEach(f => formData.append('files', f));
+    } else {
+      formData.append('files', files);
+    }
+    
+    if (description) formData.append('description', description);
+    
+    return fetch(`${API_BASE_URL}/incidents/analyze`, {
+      method: 'POST',
+      body: formData,
+    }).then(res => {
+      if (!res.ok) throw new Error('AI analysis failed');
+      return res.json();
+    });
+  },
+
+  auditIncident: (id) => apiFetch(`/incidents/${id}/audit`, { method: 'POST' }),
+
+  // Digital Twin
+  getLiveTwinData: () => apiFetch('/digital-twin/live'),
 };

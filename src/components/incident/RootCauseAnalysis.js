@@ -4,9 +4,9 @@ import {
   Settings, 
   MoreVertical,
   ChevronDown,
-  Calendar,
-  Loader2
+  Calendar
 } from 'lucide-react';
+import Loader from '../common/Loader';
 import { api } from '../../services/api';
 import './RootCauseAnalysis.css';
 
@@ -22,7 +22,7 @@ const RootCauseAnalysis = () => {
   const fetchRCAs = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getRCAs({ page, page_size: 20 });
+      const data = await api.getRCAs({ page, page_size: 6 });
       setRcaData(data.items);
       setTotal(data.total);
     } catch (err) {
@@ -112,7 +112,7 @@ const RootCauseAnalysis = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="9" style={{ padding: '40px', textAlign: 'center' }}>
-                      <Loader2 className="animate-spin" size={32} color="#22d3ee" style={{ margin: '0 auto' }} />
+                      <Loader size={32} style={{ margin: '0 auto' }} />
                     </td>
                   </tr>
                 ) : rcaData.length === 0 ? (

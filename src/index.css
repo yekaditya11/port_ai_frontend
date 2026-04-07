@@ -3,8 +3,9 @@
 :root {
   /* Colors - Based on the mockup requirement: Cyan Sidebar + Dark Shelf + Light Content */
   --bg-main: #f5f8fa;
-  --bg-sidebar: #22d3ee; /* Bright Cyan (Sky 400ish) from mockup */
-  --bg-sidebar-active: #012a4a; /* Dark Navy for active/hover */
+  --brand-cyan: #00c4f4;
+  --bg-sidebar: var(--brand-cyan);
+  --bg-sidebar-active: #012a4a;
   --bg-card: #ffffff;
   --bg-card-header: #fafbfc;
   
@@ -63,4 +64,13 @@ button {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

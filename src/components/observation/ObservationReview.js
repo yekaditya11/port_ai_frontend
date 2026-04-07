@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ChevronDown, ChevronUp, Calendar, Search, Settings, 
-  MapPin, Clock, Monitor, X, Activity, Loader2, AlertCircle
+  MapPin, Monitor, X, Activity, Loader2, AlertCircle
 } from 'lucide-react';
 import { api } from '../../services/api';
 import './ObservationReview.css';
-import '../common/DateRangePicker.css';
+import DateRangePicker from '../common/DateRangePicker';
 
 const PAGE_SIZE = 10;
 
@@ -159,26 +159,18 @@ const ObservationReview = () => {
             </div>
             <ChevronDown size={12} className="obs-review-filter-box-arrow" />
             {isDatePickerOpen && (
-              <div className="date-range-popover" onClick={e => e.stopPropagation()}>
-                <div className="date-range-popover-row">
-                  <span className="date-range-label">From Date</span>
-                  <input
-                    type="date"
-                    className="date-range-input"
-                    value={filters.from_date}
-                    onChange={e => setFilters(f => ({ ...f, from_date: e.target.value }))}
-                  />
-                </div>
-                <div className="date-range-popover-row">
-                  <span className="date-range-label">To Date</span>
-                  <input
-                    type="date"
-                    className="date-range-input"
-                    value={filters.to_date}
-                    onChange={e => setFilters(f => ({ ...f, to_date: e.target.value }))}
-                  />
-                </div>
-              </div>
+              <DateRangePicker 
+                startDate={filters.from_date ? new Date(filters.from_date) : null}
+                endDate={filters.to_date ? new Date(filters.to_date) : null}
+                onSelect={(start, end) => {
+                  setFilters(prev => ({
+                    ...prev,
+                    from_date: start ? start.toISOString().split('T')[0] : '',
+                    to_date: end ? end.toISOString().split('T')[0] : ''
+                  }));
+                }}
+                onClose={() => setIsDatePickerOpen(false)}
+              />
             )}
           </div>
 

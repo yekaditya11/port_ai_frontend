@@ -4,10 +4,10 @@ import {
   Settings, 
   ChevronDown,
   Calendar,
-  MoreVertical,
   Clock,
-  Loader2
+  MoreVertical
 } from 'lucide-react';
+import Loader from '../common/Loader';
 import { api } from '../../services/api';
 import './IncidentWorkflow.css';
 
@@ -21,7 +21,7 @@ const IncidentWorkflow = () => {
   const fetchWorkflows = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getWorkflows({ page, page_size: 20 });
+      const data = await api.getWorkflows({ page, page_size: 6 });
       setWorkflowData(data.items);
       setTotal(data.total);
     } catch (err) {
@@ -114,7 +114,7 @@ const IncidentWorkflow = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="12" style={{ padding: '40px', textAlign: 'center' }}>
-                      <Loader2 className="animate-spin" size={32} color="#22d3ee" style={{ margin: '0 auto' }} />
+                      <Loader size={32} style={{ margin: '0 auto' }} />
                     </td>
                   </tr>
                 ) : workflowData.length === 0 ? (

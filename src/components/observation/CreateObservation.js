@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Calendar, Clock, Paperclip, ChevronDown, PlusCircle, 
-  ArrowUpFromLine, User, LanguagesPlus, Languages, Plus, Video, Image as ImageIcon, X, Loader2, MapPin
+  ArrowUpFromLine, Languages, Plus, Video, X, Loader2, MapPin,
+  ChevronDown, Clock, PlusCircle, Paperclip
 } from 'lucide-react';
 import { api } from '../../services/api';
 import './CreateObservation.css';
@@ -743,13 +743,6 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
       setAnalyzeMessage(err.message || 'AI analysis failed. Please fill the form manually.');
     } finally {
       setAnalyzing(false);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (file && preview) {
-      onUpload({ file_name: file.name, file_url: preview, type, description });
-      onClose();
     }
   };
 

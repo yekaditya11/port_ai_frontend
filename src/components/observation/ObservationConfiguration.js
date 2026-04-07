@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  ChevronDown, Search, MoreVertical, 
-  Settings
+  ChevronDown, MoreVertical
 } from 'lucide-react';
 import './ObservationConfiguration.css';
 
