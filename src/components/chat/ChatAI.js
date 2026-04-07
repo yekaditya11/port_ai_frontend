@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Mic, ArrowUp, AlertCircle, X, ChevronLeft } from 'lucide-react';
+import { Plus, Mic, ArrowUp, AlertCircle, X, ChevronLeft, BarChart2, Table } from 'lucide-react';
 import { api } from '../../services/api';
+import ChatbotChart from './ChatbotChart';
 import './ChatAI.css';
 
 /* ── Gemini Logo ── */
@@ -43,16 +44,16 @@ const SUGGESTIONS = [
     text: 'Show me the latest incidents and observations.',
   },
   {
-    highlighted: 'most safety events',
-    text: 'Which areas have the most safety events?',
+    highlighted: 'observations events',
+    text: 'Which areas have the most observations events',
   },
   {
     highlighted: 'near miss observations',
     text: 'How many near miss observations do we have?',
   },
   {
-    highlighted: 'OBS963235321',
-    text: 'Explain observation OBS963235321 in simple terms.',
+    highlighted: 'OBS471813435',
+    text: 'Explain observation OBS471813435 in simple terms.',
   },
 ];
 
@@ -87,8 +88,48 @@ const ResponseTable = ({ table }) => {
   );
 };
 
+/* ── Text streaming effect ── */
+const TypewriterText = ({ text, speed = 15, onComplete }) => {
+  const [displayedText, setDisplayedText] = useState('');
+
+  useEffect(() => {
+    if (!text) {
+      setDisplayedText('');
+      if (onComplete) onComplete();
+      return;
+    }
+    
+    let index = 0;
+    setDisplayedText('');
+    const messagesContainer = document.querySelector('.chat-messages');
+
+    const interval = setInterval(() => {
+      index++;
+      setDisplayedText(text.slice(0, index));
+      
+      // Auto-scroll the container as text streams naturally
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+      
+      if (index >= text.length) {
+        clearInterval(interval);
+        if (onComplete) onComplete();
+      }
+    }, speed);
+    
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, speed]);
+
+  return <span>{displayedText}</span>;
+};
+
 /* ── Renders the AI message content based on response_type ── */
 const AIMessageContent = ({ msg }) => {
+  const [activeView, setActiveView] = useState('chart');
+  const [isTypingComplete, setIsTypingComplete] = useState(!msg.answer);
+
   // User message — plain text
   if (msg.role === 'user') {
     return <span>{msg.content}</span>;
@@ -106,25 +147,78 @@ const AIMessageContent = ({ msg }) => {
 
   const { response_type, answer, table } = msg;
 
+  const isValidChart = !!(msg.chart && msg.chart.chart_type && msg.chart.chart_type !== "none" && msg.chart.chart_data && msg.chart.chart_data.length > 0);
+  const isValidTable = !!(table && table.columns && table.rows);
+
   if (response_type === 'text') {
-    return <span>{answer}</span>;
+    return (
+      <>
+        <span><TypewriterText text={answer} onComplete={() => setIsTypingComplete(true)} /></span>
+        {isTypingComplete && isValidChart && <ChatbotChart chart={msg.chart} />}
+      </>
+    );
   }
 
   if (response_type === 'table') {
-    return <ResponseTable table={table} />;
+    return (
+      <>
+        {isTypingComplete && isValidTable && <ResponseTable table={table} />}
+        {isTypingComplete && isValidChart && <ChatbotChart chart={msg.chart} />}
+      </>
+    );
   }
 
   if (response_type === 'both') {
     return (
       <>
-        {answer && <p className="chat-answer-text">{answer}</p>}
-        <ResponseTable table={table} />
+        {answer && <p className="chat-answer-text"><TypewriterText text={answer} onComplete={() => setIsTypingComplete(true)} /></p>}
+        {isTypingComplete && isValidTable && isValidChart ? (
+          <div className="chat-combined-view">
+            <div className="chat-view-toggle">
+              <button 
+                className={`view-toggle-btn ${activeView === 'chart' ? 'active' : ''}`}
+                onClick={() => setActiveView('chart')}
+                title="View Chart"
+              >
+                <BarChart2 size={16} /> <span>Chart</span>
+              </button>
+              <button 
+                className={`view-toggle-btn ${activeView === 'table' ? 'active' : ''}`}
+                onClick={() => setActiveView('table')}
+                title="View Table"
+              >
+                <Table className="lucide-icon" size={16} /> <span>Table</span>
+              </button>
+            </div>
+            
+            <div className="chat-view-content">
+              {activeView === 'chart' ? (
+                <ChatbotChart chart={msg.chart} />
+              ) : (
+                <ResponseTable table={table} />
+              )}
+            </div>
+          </div>
+        ) : (
+          isTypingComplete && (
+            <>
+              {isValidChart && <ChatbotChart chart={msg.chart} />}
+              {isValidTable && <ResponseTable table={table} />}
+            </>
+          )
+        )}
       </>
     );
   }
 
   // Fallback
-  return <span>{answer || msg.content}</span>;
+  return (
+    <>
+      <span>{answer ? <TypewriterText text={answer} onComplete={() => setIsTypingComplete(true)} /> : msg.content}</span>
+      {isTypingComplete && isValidChart && <ChatbotChart chart={msg.chart} />}
+      {isTypingComplete && isValidTable && <ResponseTable table={table} />}
+    </>
+  );
 };
 
 const ChatAI = ({ isPanel = false, onClose }) => {
@@ -162,6 +256,7 @@ const ChatAI = ({ isPanel = false, onClose }) => {
         response_type: data.response_type,
         answer: data.answer,
         table: data.table,
+        chart: data.chart,
         intent: data.intent,
         query_id: data.query_id,
         sources: data.sources,
@@ -292,13 +387,6 @@ const ChatAI = ({ isPanel = false, onClose }) => {
                 <div className={`message-bubble ${msg.role === 'user' ? 'user-bubble' : 'ai-bubble'} ${msg.isError ? 'error-bubble' : ''}`}>
                   <AIMessageContent msg={msg} />
                 </div>
-                {/* Sources badge */}
-                {msg.sources && msg.sources.length > 0 && (
-                  <div className="message-sources">
-                    Sources: {msg.sources.join(', ')}
-                  </div>
-                )}
-                <div className="message-time">{msg.time}</div>
               </div>
             </div>
           ))}

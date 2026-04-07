@@ -709,19 +709,52 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
   const totalCount = existingAttachments.length;
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
-    const isVideo = selectedFile.type.startsWith('video/');
-    const isImage = selectedFile.type.startsWith('image/');
-    if (totalCount >= 4) { alert('Maximum of 4 attachments allowed.'); return; }
-    if (isVideo && videoCount >= 1) { alert('Only 1 video is allowed.'); return; }
-    if (isImage && imageCount >= 3) { alert('Maximum of 3 images allowed.'); return; }
-    setFile(selectedFile);
-    setType(selectedFile.type);
-    setAnalyzeStatus(null);
-    const reader = new FileReader();
-    reader.onloadend = () => setPreview(reader.result);
-    reader.readAsDataURL(selectedFile);
+    const selectedFiles = Array.from(e.target.files);
+    if (!selectedFiles.length) return;
+
+    // Running counts so limits are checked across the batch being added
+    let runningTotal = totalCount;
+    let runningVideos = videoCount;
+    let runningImages = imageCount;
+
+    selectedFiles.forEach((selectedFile) => {
+      const isVideo = selectedFile.type.startsWith('video/');
+      const isImage = selectedFile.type.startsWith('image/');
+
+      if (runningTotal >= 4) {
+        alert(`Skipped "${selectedFile.name}" — maximum of 4 attachments reached.`);
+        return;
+      }
+      if (isVideo && runningVideos >= 1) {
+        alert(`Skipped "${selectedFile.name}" — only 1 video is allowed.`);
+        return;
+      }
+      if (isImage && runningImages >= 3) {
+        alert(`Skipped "${selectedFile.name}" — maximum of 3 images allowed.`);
+        return;
+      }
+
+      // Read and add this file
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onUpload({
+          file_name: selectedFile.name,
+          file_url: reader.result,
+          type: selectedFile.type,
+          description: '',
+        });
+      };
+      reader.readAsDataURL(selectedFile);
+
+      // Update running counts
+      runningTotal++;
+      if (isVideo) runningVideos++;
+      if (isImage) runningImages++;
+    });
+
+    // Update the label to show how many were picked
+    setFile(selectedFiles[0]); // just for the dropzone label
+    e.target.value = '';        // reset so same files can be re-selected if needed
   };
 
   const handleAnalyze = async () => {
@@ -760,10 +793,17 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
 
         {/* Drop zone */}
         <div className="upload-dropzone" onClick={() => fileInputRef.current?.click()}>
-          <input type="file" ref={fileInputRef} hidden accept="image/*,video/*" onChange={handleFileChange} />
+          <input
+            type="file"
+            ref={fileInputRef}
+            hidden
+            multiple
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+          />
           <div className="dropzone-content">
             <Paperclip size={24} color="#94a3b8" />
-            <p>{file ? file.name : 'Browse file or drag and drop your file'}</p>
+            <p>{file ? `${file.name}${totalCount > 0 ? ` (+${totalCount} added)` : ''}` : 'Browse files or drag and drop (images & video)'}</p>
           </div>
         </div>
 

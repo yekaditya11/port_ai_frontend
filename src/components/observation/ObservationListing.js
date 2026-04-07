@@ -214,55 +214,64 @@ const ObservationListing = () => {
         ) : (
           observations.map((row, index) => (
             <div key={`${row.observation_ref}-${index}`} className="obs-list-row">
-              
+
+              {/* Observation ref + monitor icon */}
               <div className="obs-col col-assets" style={{ flexDirection: 'row', justifyContent: 'space-between', paddingRight: '20px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span className="obs-row-title">Observation Details</span>
-                  <span className="obs-row-sub obs-link" style={{ fontWeight: '700', color: '#0ea5e9' }}>{row.observation_ref}</span>
+                  <span className="obs-cell-primary">Observation Details</span>
+                  <span className="obs-cell-ref" onClick={() => navigate(`/observation/review/${row.observation_ref}`)}>{row.observation_ref}</span>
                 </div>
                 <div style={{ paddingTop: '10px' }}>
                   <Monitor size={14} className="icon-small" color="#94a3b8" />
                 </div>
               </div>
 
+              {/* Reporter */}
               <div className="obs-col col-user" style={{ minWidth: '150px' }}>
-                <span className="obs-row-sub" style={{ fontWeight: '700', color: '#1e293b' }}>{row.reported_by_name || 'Anonymous'}</span>
-                <span className="obs-row-sub" style={{ fontSize: '11px' }}>{row.designation || '--'}</span>
+                <span className="obs-cell-primary">{row.reported_by_name || 'Anonymous'}</span>
+                <span className="obs-cell-secondary">{row.designation || '--'}</span>
               </div>
 
+              {/* Reported date/time */}
               <div className="obs-col col-date1">
-                <span className="obs-row-sub">{formatDateForUI(row.reported_date)}</span>
-                <span className="obs-row-sub">{formatTimeForUI(row.reported_date)}</span>
+                <span className="obs-cell-primary">{formatDateForUI(row.reported_date)}</span>
+                <span className="obs-cell-secondary">{formatTimeForUI(row.reported_date)}</span>
               </div>
 
+              {/* Closed date/time (placeholder) */}
               <div className="obs-col col-date2">
-                <span className="obs-row-sub" style={{ color: '#94a3b8' }}>--</span>
-                <span className="obs-row-sub" style={{ color: '#94a3b8' }}>--</span>
+                <span className="obs-cell-primary">--</span>
+                <span className="obs-cell-secondary">--</span>
               </div>
 
+              {/* Area / Sub-area */}
               <div className="obs-col col-loc">
-                <span className="obs-row-sub" style={{ color: '#1e293b' }}>{row.area_of_observation || 'Unknown Area'}</span>
-                <span className="obs-row-sub" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="obs-cell-primary">{row.area_of_observation || 'Unknown Area'}</span>
+                <span className="obs-cell-secondary">
                   <MapPin size={12} className="icon-small" /> {row.sub_area || '--'}
                 </span>
               </div>
 
+              {/* Observation group / type */}
               <div className="obs-col col-title" style={{ flex: 1.5 }}>
-                <span className="obs-row-sub" style={{ fontWeight: '600', color: '#1e293b' }}>{row.observation_group}</span>
-                <span className="obs-row-sub">{row.observation_type}</span>
+                <span className="obs-cell-primary">{row.observation_group || '--'}</span>
+                <span className="obs-cell-secondary">{row.observation_type || '--'}</span>
               </div>
 
+              {/* Status badge */}
               <div className="obs-col col-status">
                 <div className={`status-badge status-${(row.status || 'new').toLowerCase()}`}>
                   {row.status}
                 </div>
               </div>
 
+              {/* Timer */}
               <div className="obs-col col-timer">
                 <Clock size={14} className="icon-small" />
-                <span className="obs-row-sub">00:00:00</span>
+                <span className="obs-cell-secondary">00:00:00</span>
               </div>
 
+              {/* Actions */}
               <div className="obs-col col-menu">
                 <MoreVertical size={16} className="icon-small" style={{ cursor: 'pointer', marginBottom: '8px' }} />
                 <ChevronDown size={14} className="icon-small" style={{ cursor: 'pointer' }} />
