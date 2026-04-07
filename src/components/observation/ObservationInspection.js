@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   ChevronDown, ChevronUp, Calendar, Search, Settings, 
   MapPin, Clock, MoreVertical, Monitor, X
@@ -8,7 +7,6 @@ import './ObservationInspection.css';
 import DateRangePicker from '../common/DateRangePicker';
 
 const ObservationInspection = () => {
-  const navigate = useNavigate();
   
   const initialData = [
     {

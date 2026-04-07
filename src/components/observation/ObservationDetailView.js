@@ -16,6 +16,7 @@ const ObservationDetailView = () => {
   const [obs, setObs]           = useState(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
+  const [saving, setSaving]     = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
