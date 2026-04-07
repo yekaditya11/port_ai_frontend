@@ -132,4 +132,10 @@ export const api = {
   // Observation Review Factors (UNSAFE ABC)
   getPrimaryFactors: () => apiFetch('/observation-factors/primary'),
   getFactorOptions: (primaryId) => apiFetch(`/observation-factors/${primaryId}`),
+
+  // Chatbot
+  chatbotQuery: (message) => apiFetch('/chatbot/query', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  }),
 };

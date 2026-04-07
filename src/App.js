@@ -27,6 +27,7 @@ import ObservationConfiguration from './components/observation/ObservationConfig
 import DensityReport from './components/observation/reports/DensityReport';
 import ListReport from './components/observation/reports/ListReport';
 import PerformanceReport from './components/observation/reports/PerformanceReport';
+import ChatAI from './components/chat/ChatAI';
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
           <Route path="/observation/reports/observation-list" element={<ListReport />} />
           <Route path="/observation/reports/observer-performance" element={<PerformanceReport />} />
           <Route path="/observation/configuration" element={<ObservationConfiguration />} />
+          <Route path="/chat-ai" element={<ChatAI />} />
         </Routes>
       </DashboardLayout>
     </BrowserRouter>
