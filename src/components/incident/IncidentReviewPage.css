@@ -76,30 +76,28 @@
 .btn-ai-audit {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white !important;
-  font-weight: 700;
-  border: none;
-  padding: 0 24px;
-  border-radius: 8px;
-  height: 42px;
+  justify-content: center;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  padding: 0;
 }
 
 .btn-ai-audit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
-  filter: brightness(1.1);
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 196, 244, 0.15);
 }
 
 .btn-ai-audit:active {
   transform: translateY(0);
 }
+
 
 .btn-ai-audit.analyzing {
   opacity: 0.8;
@@ -377,12 +375,7 @@
   margin-bottom: 6px;
 }
 
-.rev-translate {
-  font-size: 10px;
-  color: var(--brand-cyan, #00c4f4);
-  font-weight: 700;
-  cursor: pointer;
-}
+
 
 .rev-textarea {
   width: 100%;

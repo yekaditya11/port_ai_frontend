@@ -1,48 +1,112 @@
-.stat-card {
-  background-color: #fff;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  flex: 1;
+.stat-card-premium {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-}
-
-.stat-header {
-  padding: 12px 16px;
-  background-color: #fafbfc;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.stat-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: #333;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
+  justify-content: space-between;
+  min-height: 140px;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 
-.stat-body {
-  padding: 16px;
+.stat-card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.stat-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  line-height: 1.4;
+  flex: 1;
+  margin: 0;
+}
+
+.stat-card-icon-bg {
+  background: #f8fafc;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  flex-shrink: 0;
+  border: 1px solid #f1f5f9;
 }
 
-.stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--primary);
+.stat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.stat-unit {
+.stat-card-main-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.stat-card-unit {
   font-size: 14px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-left: 4px;
+  font-weight: 600;
+  color: #94a3b8;
 }
+
+.stat-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-card-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.trend-icon.positive { color: #10b981; }
+.trend-icon.negative { color: #ef4444; }
+.trend-icon.neutral { color: #94a3b8; }
+
+.stat-card-accent-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+.stat-card-premium:hover .stat-card-accent-bar {
+  background: #0284c7;
+  height: 4px;
+  transition: all 0.3s;
+}
+
+/* Status variants */
+.stat-card-premium.critical .stat-card-accent-bar { background: #ef4444; }
+.stat-card-premium.success .stat-card-accent-bar { background: #10b981; }
+.stat-card-premium.warning .stat-card-accent-bar { background: #f59e0b; }
+.stat-card-premium.info .stat-card-accent-bar { background: #0284c7; }

@@ -1,13 +1,12 @@
 @import './styles/Charts.css';
 
 :root {
-  /* Colors - Based on the mockup requirement: Cyan Sidebar + Dark Shelf + Light Content */
-  --bg-main: #f5f8fa;
-  --brand-cyan: #00c4f4;
-  --bg-sidebar: var(--brand-cyan);
-  --bg-sidebar-active: #012a4a;
+  /* Colors - Live Twin Theme */
+  --bg-main: #f8fafc;
+  --bg-sidebar: #1e293b;
+  --bg-sidebar-active: #0f172a;
   --bg-card: #ffffff;
-  --bg-card-header: #fafbfc;
+  --bg-card-header: #f8fafc;
   
   --primary: #0284c7;
   --secondary: #64748b;

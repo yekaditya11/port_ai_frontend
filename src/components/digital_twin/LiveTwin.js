@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import anime from 'animejs';
 import { 
   Zap,
@@ -8,7 +8,8 @@ import {
   SkipForward,
   Compass,
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import './LiveTwin.css';
 
@@ -56,16 +57,33 @@ const MapSymbol = ({ type, size = 12, color = 'white' }) => {
 
 // ─── MOCK DATA ENGINE ────────────────────────────────────────────────────────
 const MOCK_ZONES = [
-  { id: 'b-a1', x: 260, y: 140, w: 100, h: 80, name: 'BERTH A1', workers: 2, labelX: 5, labelY: 15 },
-  { id: 'b-a2', x: 260, y: 230, w: 100, h: 80, name: 'BERTH A2', workers: 13, labelX: 5, labelY: 15 },
-  { id: 'b-b1', x: 260, y: 320, w: 100, h: 80, name: 'BERTH B1', workers: 5, labelX: 5, labelY: 15 },
-  { id: 'cy-1', x: 400, y: 140, w: 120, h: 170, name: 'CONTAINER YARD 1', workers: 19, labelX: 10, labelY: 15 },
-  { id: 'cy-2', x: 400, y: 320, w: 120, h: 140, name: 'CONTAINER YARD 2', workers: 24, labelX: 10, labelY: 15 },
-  { id: 'hz-1', x: 550, y: 140, w: 80, h: 120, name: 'HAZMAT STORAGE', workers: 8, labelX: 5, labelY: 15, theme: 'amber' },
-  { id: 'mb-1', x: 550, y: 280, w: 80, h: 120, name: 'MAINTENANCE BAY', workers: 14, labelX: 5, labelY: 15 },
-  { id: 'gc-1', x: 650, y: 220, w: 80, h: 150, name: 'GATE COMPLEX', workers: 28, labelX: 5, labelY: 15 },
-  { id: 'wa-1', x: 550, y: 420, w: 180, h: 100, name: 'WAREHOUSE ALPHA', workers: 52, labelX: 10, labelY: 15 },
+  { id: 'b-a1', x: 275, y: 150, w: 70, h: 60, name: 'BERTH A1', workers: 2, labelX: 4, labelY: 10 },
+  { id: 'b-a2', x: 275, y: 240, w: 70, h: 60, name: 'BERTH A2', workers: 13, labelX: 4, labelY: 10 },
+  { id: 'b-b1', x: 275, y: 330, w: 70, h: 60, name: 'BERTH B1', workers: 5, labelX: 4, labelY: 10 },
+  { id: 'cy-1', x: 415, y: 165, w: 90, h: 120, name: 'CONTAINER YARD 1', workers: 19, labelX: 6, labelY: 10 },
+  { id: 'cy-2', x: 415, y: 340, w: 90, h: 100, name: 'CONTAINER YARD 2', workers: 24, labelX: 6, labelY: 10 },
+  { id: 'hz-1', x: 555, y: 155, w: 70, h: 90, name: 'HAZMAT STORAGE', workers: 8, labelX: 4, labelY: 10, theme: 'amber' },
+  { id: 'mb-1', x: 555, y: 295, w: 70, h: 90, name: 'MAINTENANCE BAY', workers: 14, labelX: 4, labelY: 10 },
+  { id: 'gc-1', x: 655, y: 240, w: 70, h: 110, name: 'GATE COMPLEX', workers: 28, labelX: 4, labelY: 10 },
+  { id: 'wa-1', x: 570, y: 435, w: 140, h: 70, name: 'WAREHOUSE ALPHA', workers: 52, labelX: 6, labelY: 10 },
 ];
+
+const MOCK_RISK_DATA = {
+    'hz-1': { score: 97, status: 'CRITICAL', reasons: ['Ammonia (NH₃) above 25 ppm threshold', 'Wind NE pushing gas toward Berth B1', 'MSDS containment equipment absent'], actions: ['50 m exclusion zone enforced', 'Deploy portable wind barrier — north face', 'HAZMAT team containment in progress'] },
+    'cy-1': { score: 81, status: 'HIGH', reasons: ['STS-3 crane hydraulic failure — load risk', 'Worker proximity to suspended container', 'Ground congestion near stack C12'], actions: ['Evacuate 15m crane swing radius', 'Activate alternate STS-4 immediately', 'Deploy safety marshal, isolate row G10–G14'] },
+    'cy-2': { score: 52, status: 'MEDIUM', reasons: ['Wet surface near stack G7 post rain', 'Insufficient slip signage at intersection I-7', 'Shift handover in progress — supervision gap'], actions: ['Deploy anti-slip mats G7–H7 corridor', 'Mandatory pre-shift safety brief', 'Supervisor on-ground required before ops resume'] },
+    'wa-1': { score: 61, status: 'MEDIUM', reasons: ['Air quality sensor triggered', 'Minor fume accumulation reported'], actions: ['Ventilation system - High speed', 'Deploy air monitoring team'] },
+    'b-a2': { score: 44, status: 'LOW', reasons: ['Vessel docking operations'], actions: ['Maintain standard safety distance'] },
+};
+
+const MOCK_OPS_DATA = {
+    'wa-1': { intensity: 85, trend: 'up' },
+    'cy-2': { intensity: 72, trend: 'steady' },
+    'cy-1': { intensity: 64, trend: 'down' },
+    'gc-1': { intensity: 92, trend: 'up' },
+    'hz-1': { intensity: 22, trend: 'steady' },
+    'mb-1': { intensity: 47, trend: 'up' },
+};
 
 const MOCK_VESSELS = [
   { id: 'v1', x: 195, y: 180, name: 'MSC AURORA', type: 'container', status: 'DOCKED', cargo: 'Electronics', rotation: 270, color: C.violet },
@@ -117,17 +135,30 @@ export default function LiveTwin() {
   const [data] = useState({ incidents: MOCK_INCIDENTS, vessels: MOCK_VESSELS, activities: MOCK_ACTIVITIES, zones: MOCK_ZONES });
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [selectedVessel, setSelectedVessel] = useState(null);
+  const [showFullDetails, setShowFullDetails] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
   const [isLive, setIsLive] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [viewMode, setViewMode] = useState('live'); // 'live', 'ops', 'risk'
+  const [selectedZoneId, setSelectedZoneId] = useState(null);
   
+  useEffect(() => {
+    const handleHeaderViewChange = (e) => {
+      if (e.detail) setViewMode(e.detail);
+    };
+    window.addEventListener('dt-view-change', handleHeaderViewChange);
+    return () => window.removeEventListener('dt-view-change', handleHeaderViewChange);
+  }, []);
+
+  // Handle auto-centering on selected zone (Now just for logical highlighting)
+  useEffect(() => {
+    if (selectedZoneId) {
+      // Zone selection logic...
+    }
+  }, [selectedZoneId]);
+
   const mapContainerRef = useRef(null);
   const radarRef = useRef(null);
-  const [mapXform, setMapXform] = useState({ x: 0, y: 0, scale: 1.1 });
-  const [mapCursor, setMapCursor] = useState("grab");
-  const isDragging = useRef(false);
-  const dragOrigin = useRef({ x: 0, y: 0 });
-  const xformAtDrag = useRef({ x: 0, y: 0, scale: 1 });
 
   const [timelineProgress, setTimelineProgress] = useState(100);
   const timelineTrackRef = useRef(null);
@@ -178,13 +209,14 @@ export default function LiveTwin() {
   }).reverse();
 
   // Top Alert Logic
-  const topAlert = useMemo(() => {
-    if (filteredIncidents.length === 0) return null;
-    const severityMap = { critical: 4, high: 3, medium: 2, low: 1 };
-    return [...filteredIncidents].sort((a, b) => severityMap[b.severity] - severityMap[a.severity] || b.id.localeCompare(a.id))[0];
-  }, [filteredIncidents]);
+  // Top Alert Logic (Currently unused but available for future)
+//   const topAlert = useMemo(() => {
+//     if (filteredIncidents.length === 0) return null;
+//     const severityMap = { critical: 4, high: 3, medium: 2, low: 1 };
+//     return [...filteredIncidents].sort((a, b) => severityMap[b.severity] - severityMap[a.severity] || b.id.localeCompare(a.id))[0];
+//   }, [filteredIncidents]);
 
-  const W = 900, H = 550;
+  const W = 900, H = 650;
 
   useEffect(() => {
     let t;
@@ -219,19 +251,8 @@ export default function LiveTwin() {
     return () => clearInterval(t);
   }, [isLive, timelineProgress]);
 
-  // Animations (Radar & Continuous)
+  // Continuous Animations
   useEffect(() => {
-    const sweep = radarRef.current?.querySelector(".radar-sweep");
-    if (sweep) {
-        anime({
-          targets: sweep,
-          rotate: '360deg',
-          duration: 4000,
-          easing: 'linear',
-          loop: true
-        });
-    }
-
     anime({
       targets: '.vessel-node',
       translateY: [0, -2, 0],
@@ -258,50 +279,7 @@ export default function LiveTwin() {
     }
   }, [filteredIncidents]);
 
-  // Pan & Zoom
-  const handleMouseDown = (e) => {
-    if (e.button !== 0) return;
-    isDragging.current = true;
-    dragOrigin.current = { x: e.clientX, y: e.clientY };
-    xformAtDrag.current = { ...mapXform };
-    setMapCursor("grabbing");
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging.current) return;
-    const dx = e.clientX - dragOrigin.current.x;
-    const dy = e.clientY - dragOrigin.current.y;
-    setMapXform({ ...xformAtDrag.current, x: xformAtDrag.current.x + dx, y: xformAtDrag.current.y + dy });
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
-    setMapCursor("grab");
-  };
-
-  const zoomAt = useCallback((factor, cx, cy) => {
-    setMapXform(prev => {
-      const ns = Math.min(Math.max(prev.scale * factor, 0.4), 4);
-      const sf = ns / prev.scale;
-      return { x: cx - sf * (cx - prev.x), y: cy - sf * (cy - prev.y), scale: ns };
-    });
-  }, []);
-
-  useEffect(() => {
-    const el = mapContainerRef.current;
-    if (!el) return;
-    const onWheel = (e) => {
-      e.preventDefault();
-      const r = el.getBoundingClientRect();
-      zoomAt(e.deltaY < 0 ? 1.1 : 0.9, e.clientX - r.left, e.clientY - r.top);
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [zoomAt]);
-
-  const resetMap = () => {
-    setMapXform({ x: 0, y: 0, scale: 1.1 });
-  };
+  // Pan & Zoom logic removed for responsive fixed view
 
   return (
     <div className="live-twin-container premium-theme" onMouseDown={() => isPlaying && setIsPlaying(false)}>
@@ -311,19 +289,18 @@ export default function LiveTwin() {
         <div 
           ref={mapContainerRef}
           className="map-viewport" 
-          style={{ cursor: mapCursor }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          onMouseDown={(e) => {
+            if (e.target.classList.contains('map-svg')) {
+                setSelectedZoneId(null);
+                setSelectedIncident(null);
+                setSelectedVessel(null);
+            }
+          }}
         >
           <svg 
             viewBox={`0 0 ${W} ${H}`} 
             className="map-svg"
-            style={{ 
-              transform: `translate(${mapXform.x}px, ${mapXform.y}px) scale(${mapXform.scale})`,
-              transformOrigin: "0 0" 
-            }}
+            preserveAspectRatio="xMidYMid meet"
           >
             <defs>
               <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
@@ -334,6 +311,32 @@ export default function LiveTwin() {
                 <feOffset dx="0" dy="2" result="offsetblur" />
                 <feComponentTransfer><feFuncA type="linear" slope="0.1"/></feComponentTransfer>
                 <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+
+              {/* Heatmap Gradients */}
+              <radialGradient id="risk-hotspot-critical">
+                <stop offset="0%" stopColor={C.rose} stopOpacity="0.7" />
+                <stop offset="50%" stopColor={C.rose} stopOpacity="0.3" />
+                <stop offset="100%" stopColor={C.rose} stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="risk-hotspot-high">
+                <stop offset="0%" stopColor={C.orange} stopOpacity="0.6" />
+                <stop offset="60%" stopColor={C.orange} stopOpacity="0.2" />
+                <stop offset="100%" stopColor={C.orange} stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="risk-hotspot-medium">
+                <stop offset="0%" stopColor={C.amber} stopOpacity="0.5" />
+                <stop offset="70%" stopColor={C.amber} stopOpacity="0.1" />
+                <stop offset="100%" stopColor={C.amber} stopOpacity="0" />
+              </radialGradient>
+
+              <radialGradient id="ops-intensity">
+                <stop offset="0%" stopColor={C.sky} stopOpacity="0.5" />
+                <stop offset="100%" stopColor={C.sky} stopOpacity="0" />
+              </radialGradient>
+
+              <filter id="heatmap-blur">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" />
               </filter>
             </defs>
 
@@ -361,6 +364,22 @@ export default function LiveTwin() {
               <circle r={60} fill="none" stroke={C.indigo} strokeWidth={0.5} opacity={0.1} />
               <circle r={40} fill="none" stroke={C.indigo} strokeWidth={0.5} opacity={0.15} />
               <circle r={20} fill="none" stroke={C.indigo} strokeWidth={0.5} opacity={0.2} />
+              
+              {/* Radar Blips (Vessels) */}
+              {data.vessels.map(v => {
+                const dx = (v.x - 100) * 0.15;
+                const dy = (v.y - 100) * 0.15;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist > 58) return null; // Outside radar range
+                
+                return (
+                  <g key={`blip-${v.id}`} transform={`translate(${dx}, ${dy})`}>
+                    <circle r={2} fill={v.color} className="radar-blip-glow" />
+                    <circle r={4} fill={v.color} opacity={0.2} className="radar-blip-pulse" />
+                  </g>
+                );
+              })}
+
               <g className="radar-sweep">
                  <path d="M0,0 L60,-6 A60,60 0 0,1 60,6 Z" fill={C.indigo} opacity={0.15} />
               </g>
@@ -380,28 +399,91 @@ export default function LiveTwin() {
                 <text 
                   x={z.x + (z.labelX || 0)} y={z.y + (z.labelY || 0)} 
                   fill={z.theme === 'amber' ? C.orange : C.emerald} 
-                  fontSize={8} fontWeight="900" letterSpacing={0.5}
+                  fontSize={6} fontWeight="900" letterSpacing={0.5}
                 >
                   {z.name}
                 </text>
-                <text x={z.x + (z.labelX || 0)} y={z.y + (z.labelY || 0) + 12} fill={C.textMuted} fontSize={7} fontWeight="500">
+                <text x={z.x + (z.labelX || 0)} y={z.y + (z.labelY || 0) + 8} fill={C.textMuted} fontSize={5} fontWeight="500">
                     {z.workers} workers
                 </text>
               </g>
             ))}
 
-            {/* Vessels */}
-            {data.vessels.map(v => (
-              <g key={v.id} className="vessel-node" onClick={() => setSelectedVessel(v)}>
-                <VesselShape vessel={v} isSelected={selectedVessel?.id === v.id} />
-                <path d={`M${v.x - 40},${v.y} L${v.x - 10},${v.y}`} stroke={v.color} strokeWidth={1} opacity={0.4} />
-                <circle cx={v.x - 40} cy={v.y} r={2} fill={v.color} />
-                <text x={v.x - 36} y={v.y - 6} fill={C.textPrimary} fontSize={7} fontWeight="900">{v.name}</text>
-              </g>
-            ))}
+            {/* Heatmap Overlays */}
+            {viewMode === 'risk' && data.zones.map(z => {
+              const risk = MOCK_RISK_DATA[z.id];
+              if (!risk) return null;
+              const isSelected = z.id === selectedZoneId;
+              const gradientId = risk.score > 90 ? 'risk-hotspot-critical' : risk.score > 70 ? 'risk-hotspot-high' : 'risk-hotspot-medium';
+              return (
+                <g key={`risk-heat-${z.id}`} style={{ cursor: 'pointer' }} onClick={() => setSelectedZoneId(z.id)}>
+                  <circle 
+                    cx={z.x + z.w/2} cy={z.y + z.h/2} 
+                    r={isSelected ? Math.max(z.w, z.h) * 1.2 : Math.max(z.w, z.h) * 0.8} 
+                    fill={`url(#${gradientId})`}
+                    className={isSelected ? "heatmap-glow-active" : "heatmap-glow"}
+                    style={{ transition: 'all 0.4s' }}
+                  />
+                  {isSelected && (
+                    <rect 
+                      x={z.x - 5} y={z.y - 5} width={z.w + 10} height={z.h + 10} 
+                      fill="none" stroke="#6366f1" strokeWidth={3} rx={8} 
+                      className="zone-highlight-pulse"
+                    />
+                  )}
+                  <g transform={`translate(${z.x + z.w/2}, ${z.y + z.h/2})`}>
+                    <text textAnchor="middle" y={-3} fill={incidentPalette[risk.status.toLowerCase()].color} fontSize={8} fontWeight="900" style={{ textShadow: '0 0 10px white' }}>
+                        {risk.score}%
+                    </text>
+                    <text textAnchor="middle" y={8} fill={incidentPalette[risk.status.toLowerCase()].color} fontSize={6} fontWeight="900" letterSpacing={0.5}>
+                        {risk.status} RISK
+                    </text>
+                  </g>
+                </g>
+              );
+            })}
 
-            {/* Incidents */}
-            {filteredIncidents.map(inc => {
+            {viewMode === 'ops' && data.zones.map(z => {
+              const ops = MOCK_OPS_DATA[z.id];
+              if (!ops) return null;
+              const isSelected = z.id === selectedZoneId;
+              return (
+                <g key={`ops-heat-${z.id}`} style={{ cursor: 'pointer' }} onClick={() => setSelectedZoneId(z.id)}>
+                  <circle 
+                    cx={z.x + z.w/2} cy={z.y + z.h/2} 
+                    r={(ops.intensity / 100) * Math.max(z.w, z.h) * (isSelected ? 1.5 : 1.2)} 
+                    fill="url(#ops-intensity)"
+                    className={isSelected ? "heatmap-glow-active" : "heatmap-glow-soft"}
+                    style={{ transition: 'all 0.4s' }}
+                  />
+                  {isSelected && (
+                    <rect 
+                      x={z.x - 5} y={z.y - 5} width={z.w + 10} height={z.h + 10} 
+                      fill="none" stroke="#0ea5e9" strokeWidth={3} rx={8} 
+                      className="zone-highlight-pulse"
+                    />
+                  )}
+                  <text x={z.x + z.w/2} y={z.y + z.h/2 + 3} textAnchor="middle" fill={C.sky} fontSize={9} fontWeight="900" style={{ pointerEvents: 'none' }}>
+                    {ops.intensity}%
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Vessels */}
+            <g style={{ opacity: viewMode === 'live' ? 1 : 0.2, transition: 'opacity 0.5s' }}>
+                {data.vessels.map(v => (
+                <g key={v.id} className="vessel-node" onClick={() => setSelectedVessel(v)}>
+                    <VesselShape vessel={v} isSelected={selectedVessel?.id === v.id} />
+                    <path d={`M${v.x - 40},${v.y} L${v.x - 10},${v.y}`} stroke={v.color} strokeWidth={1} opacity={0.4} />
+                    <circle cx={v.x - 40} cy={v.y} r={2} fill={v.color} />
+                    <text x={v.x - 36} y={v.y - 6} fill={C.textPrimary} fontSize={7} fontWeight="900">{v.name}</text>
+                </g>
+                ))}
+            </g>
+
+            {/* Incidents (Only in Live mode) */}
+            {viewMode === 'live' && filteredIncidents.map(inc => {
               const theme = incidentPalette[inc.severity];
               return (
                 <g key={inc.id} className="incident-node" onClick={() => setSelectedIncident(inc)}>
@@ -419,7 +501,7 @@ export default function LiveTwin() {
             })}
 
             {/* Floating Legend */}
-            <g transform={`translate(${W - 130}, ${H - 180})`} className="floating-legend">
+            <g transform={`translate(${W - 130}, ${H - 260})`} className="floating-legend">
                 <rect width={120} height={170} rx={8} fill="rgba(255,255,255,0.9)" stroke="#e2e8f0" strokeWidth={1} />
                 <text x={10} y={20} fill={C.textMuted} fontSize={8} fontWeight="900" letterSpacing={1}>LEGEND</text>
                 
@@ -465,11 +547,28 @@ export default function LiveTwin() {
                     <text x={10} y={38} fill={C.textPrimary} fontSize={9} fontWeight="700">{selectedIncident.description}</text>
                     <text x={10} y={54} fill={C.textMuted} fontSize={7}>{selectedIncident.zone} • {selectedIncident.time}</text>
                     <text x={150} y={15} textAnchor="end" fontSize={10} fill={C.textMuted} style={{cursor:'pointer'}} onClick={() => setSelectedIncident(null)}>✕</text>
-                    <rect x={110} y={45} width={40} height={15} rx={3} fill={incidentPalette[selectedIncident.severity].color} />
-                    <text x={130} y={55} textAnchor="middle" fill="white" fontSize={6} fontWeight="bold">DETAILS</text>
+                    <rect 
+                      x={110} y={45} width={40} height={15} rx={3} 
+                      fill={incidentPalette[selectedIncident.severity].color} 
+                      style={{ cursor: 'pointer' }}
+                      onClick={(e) => { e.stopPropagation(); setShowFullDetails(true); }}
+                    />
+                    <text 
+                      x={130} y={55} textAnchor="middle" fill="white" fontSize={6} fontWeight="bold"
+                      style={{ cursor: 'pointer', pointerEvents: 'none' }}
+                    >
+                      DETAILS
+                    </text>
                 </g>
             )}
           </svg>
+
+          {showFullDetails && selectedIncident && (
+            <FullDetailPanel 
+              incident={selectedIncident} 
+              onClose={() => setShowFullDetails(false)} 
+            />
+          )}
 
           { !isLive && (
             <div className="historical-overlay">
@@ -480,135 +579,363 @@ export default function LiveTwin() {
             </div>
           )}
 
-          <div className="timeline-bar" onMouseDown={e => e.stopPropagation()}>
-            <div className="timeline-controls">
-                <button className="ctrl-btn" onClick={() => { setIsLive(false); setTimelineProgress(Math.max(0, timelineProgress - 10)); }}><SkipBack size={16} /></button>
-                <button className={`ctrl-btn ${isPlaying ? 'active' : ''}`} onClick={() => { setIsLive(false); setIsPlaying(!isPlaying); }}>
-                    {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
-                </button>
-                <button className={`ctrl-btn live-toggle ${isLive ? 'active' : ''}`} onClick={() => { setIsLive(!isLive); setIsPlaying(false); }}>
-                    <div className="live-dot" /> LIVE
-                </button>
+          {viewMode === 'live' && (
+            <div className="timeline-bar" onMouseDown={e => e.stopPropagation()}>
+              <div className="timeline-controls">
+                  <button className="ctrl-btn" onClick={() => { setIsLive(false); setTimelineProgress(Math.max(0, timelineProgress - 10)); }}><SkipBack size={16} /></button>
+                  <button className={`ctrl-btn ${isPlaying ? 'active' : ''}`} onClick={() => { setIsLive(false); setIsPlaying(!isPlaying); }}>
+                      {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                  </button>
+                  <button className={`ctrl-btn live-toggle ${isLive ? 'active' : ''}`} onClick={() => { setIsLive(!isLive); setIsPlaying(false); }}>
+                      <div className="live-dot" /> LIVE
+                  </button>
+              </div>
+              <div className="timeline-track-container">
+                  <div className="timeline-labels">
+                      {[0, 20, 40, 60, 80, 100].map(pct => {
+                          const labelDate = new Date(new Date().getTime() - (10 - (pct / 10) ) * 60 * 60 * 1000);
+                          return <span key={pct}>{labelDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span>;
+                      })}
+                  </div>
+                  <div 
+                    ref={timelineTrackRef}
+                    className="timeline-track" 
+                    onMouseDown={handleTimelineMouseDown}
+                  >
+                      <div className="track-bg" />
+                      <div className={`track-progress ${isLive ? 'live' : 'review'}`} style={{ width: `${timelineProgress}%` }} />
+                      <div className={`track-thumb ${isLive ? 'live' : 'review'}`} style={{ left: `${timelineProgress}%` }} />
+                      {data.incidents.map(inc => (
+                          <div key={inc.id} className="track-marker" style={{ left: `${inc.start}%`, background: incidentPalette[inc.severity].color }} />
+                      ))}
+                  </div>
+              </div>
+              <div className="timeline-time">{currentTime.slice(0, 5)} <SkipForward size={14} /></div>
             </div>
-            <div className="timeline-track-container">
-                <div className="timeline-labels">
-                    {[0, 20, 40, 60, 80, 100].map(pct => {
-                        const labelDate = new Date(new Date().getTime() - (10 - (pct / 10) ) * 60 * 60 * 1000);
-                        return <span key={pct}>{labelDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span>;
-                    })}
-                </div>
-                <div 
-                  ref={timelineTrackRef}
-                  className="timeline-track" 
-                  onMouseDown={handleTimelineMouseDown}
-                >
-                    <div className="track-bg" />
-                    <div className={`track-progress ${isLive ? 'live' : 'review'}`} style={{ width: `${timelineProgress}%` }} />
-                    <div className={`track-thumb ${isLive ? 'live' : 'review'}`} style={{ left: `${timelineProgress}%` }} />
-                    {data.incidents.map(inc => (
-                        <div key={inc.id} className="track-marker" style={{ left: `${inc.start}%`, background: incidentPalette[inc.severity].color }} />
-                    ))}
-                </div>
-            </div>
-            <div className="timeline-time">{currentTime.slice(0, 5)} <SkipForward size={14} /></div>
-          </div>
+          )}
 
-          <div className="map-view-controls">
-            <button onClick={() => zoomAt(1.2, W/2, H/2)}>+</button>
-            <button onClick={() => zoomAt(0.8, W/2, H/2)}>−</button>
-            <button onClick={resetMap} title="Reset View" style={{ fontSize: '12px' }}>↺</button>
-          </div>
+          {/* Responsive Map View */}
         </div>
 
         {/* ── SIDEBAR ── */}
         <div className="live-twin-sidebar panel">
-          <div className="sidebar-tab-actions">
-              <span>ACTIVE INCIDENTS</span>
-              <div className="alert-count red">{filteredIncidents.length} OPEN</div>
-          </div>
-          
-          <div className="sidebar-section scrollable" style={{paddingTop: '8px'}}>
-            {filteredIncidents.map(inc => (
-                <div 
-                  key={inc.id} 
-                  className="modern-incident-card" 
-                  onClick={() => setSelectedIncident(inc)}
-                  style={{ borderLeftColor: incidentPalette[inc.severity].color }}
-                >
-                   <div className="card-top">
-                      <div className="severity-badge" style={{ color: incidentPalette[inc.severity].color, background: incidentPalette[inc.severity].bg }}>
-                         <MapSymbol type={incidentPalette[inc.severity].symbol} size={8} color={incidentPalette[inc.severity].color} />
-                         <span style={{marginLeft:'4px'}}>{inc.severity.toUpperCase()}</span>
-                      </div>
-                      <span className="view-details-link">View Details ›</span>
-                   </div>
-                   <div className="card-body">
-                      <div className="card-title">
-                        {inc.description}
-                      </div>
-                      <div className="card-loc">{inc.zone}</div>
-                   </div>
-                   <div className="card-foot">
-                      <span className={`status-pill ${inc.status.toLowerCase()}`}>{inc.status}</span>
-                   </div>
-                </div>
-            ))}
-          </div>
-
-          <div className="sidebar-section-divider">VESSEL TRAFFIC</div>
-          <div className="sidebar-section">
-            {data.vessels.map(v => (
-                <div key={v.id} className="vessel-list-item" onClick={() => setSelectedVessel(v)}>
-                    <div className="vessel-dot" style={{ background: v.color }} />
-                    <div className="vessel-info">
-                        <span className="v-name">{v.name}</span>
-                        <span className="v-type">{v.cargo}</span>
-                    </div>
-                    <div className={`v-status ${v.status.toLowerCase()}`}>{v.status} {v.eta && <span className="v-eta">{v.eta}</span>}</div>
-                </div>
-            ))}
-          </div>
-
-          <div className="sidebar-section-divider">ACTIVITY LOG</div>
-          <div className="sidebar-section scrollable activity-timeline-container" style={{maxHeight:'180px'}}>
-            <div className="timeline-connector" />
-            {filteredActivities.map(act => (
-                <div key={act.id} className="activity-item">
-                    <div className="act-dot" style={{ borderColor: act.type === 'incident' ? C.rose : C.teal }} />
-                    <div className="act-content">
-                       <div className="act-msg">{act.message}</div>
-                       <div className="act-time-row">
-                          <span className="act-time-val">{act.time}</span>
-                          <span className="act-status-meta">Verified</span>
+          {viewMode === 'live' && (
+            <>
+              <div className="sidebar-tab-actions">
+                  <span>ACTIVE INCIDENTS</span>
+                  <div className="alert-count red">{filteredIncidents.length} OPEN</div>
+              </div>
+              
+              <div className="sidebar-section scrollable" style={{paddingTop: '8px'}}>
+                {filteredIncidents.map(inc => (
+                    <div 
+                      key={inc.id} 
+                      className={`modern-incident-card ${selectedIncident?.id === inc.id ? 'active' : ''}`} 
+                      onClick={() => setSelectedIncident(inc)}
+                      style={{ borderLeftColor: incidentPalette[inc.severity].color }}
+                    >
+                       <div className="card-top">
+                          <div className="severity-badge" style={{ color: incidentPalette[inc.severity].color, background: incidentPalette[inc.severity].bg }}>
+                             <MapSymbol type={incidentPalette[inc.severity].symbol} size={8} color={incidentPalette[inc.severity].color} />
+                             <span style={{marginLeft:'4px'}}>{inc.severity.toUpperCase()}</span>
+                          </div>
+                          <span 
+                            className="view-details-link"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedIncident(inc);
+                              setShowFullDetails(true);
+                            }}
+                          >
+                            View Details ›
+                          </span>
+                       </div>
+                       <div className="card-body">
+                          <div className="card-title">
+                            {inc.description}
+                          </div>
+                          <div className="card-loc">{inc.zone}</div>
+                       </div>
+                       <div className="card-foot">
+                          <span className={`status-pill ${inc.status.toLowerCase()}`}>{inc.status}</span>
                        </div>
                     </div>
+                ))}
+              </div>
+
+              <div className="sidebar-section-divider">VESSEL TRAFFIC</div>
+              <div className="sidebar-section">
+                {data.vessels.map(v => (
+                    <div key={v.id} className="vessel-list-item" onClick={() => setSelectedVessel(v)}>
+                        <div className="vessel-dot" style={{ background: v.color }} />
+                        <div className="vessel-info">
+                            <span className="v-name">{v.name}</span>
+                            <span className="v-type">{v.cargo}</span>
+                        </div>
+                        <div className={`v-status ${v.status.toLowerCase()}`}>{v.status} {v.eta && <span className="v-eta">{v.eta}</span>}</div>
+                    </div>
+                ))}
+              </div>
+
+              <div className="sidebar-section-divider">ACTIVITY LOG</div>
+              <div className="sidebar-section scrollable activity-timeline-container" style={{maxHeight:'180px'}}>
+                <div className="timeline-connector" />
+                {filteredActivities.map(act => (
+                    <div key={act.id} className="activity-item">
+                        <div className="act-dot" style={{ borderColor: act.type === 'incident' ? C.rose : C.teal }} />
+                        <div className="act-content">
+                           <div className="act-msg">{act.message}</div>
+                           <div className="act-time-row">
+                              <span className="act-time-val">{act.time}</span>
+                              <span className="act-status-meta">Verified</span>
+                           </div>
+                        </div>
+                    </div>
+                ))}
+              </div>
+
+              <div className="sidebar-section-divider">ZONE RISK</div>
+              <div className="sidebar-section">
+                 <div className="zone-risk-grid">
+                   {['A1','A2','B1','Y1','Y2','STR','BAY','CMP','ALPH'].map(z => (
+                     <div key={z} className={`risk-tag ${['STR','Y1'].includes(z) ? 'warn' : ''}`}>{z}</div>
+                   ))}
+                 </div>
+              </div>
+            </>
+          )}
+
+          {viewMode === 'risk' && (
+            <div className="sidebar-analysis-view scrollable">
+                <div className="analysis-header">
+                    <h3>Risk Heatmap Analysis</h3>
+                    <p>Identified hotspots • reasons • recommended actions</p>
                 </div>
-            ))}
-          </div>
 
-          <div className="sidebar-section-divider">ZONE RISK</div>
-          <div className="sidebar-section">
-             <div className="zone-risk-grid">
-               {['A1','A2','B1','Y1','Y2','STR','BAY','CMP','ALPH'].map(z => (
-                 <div key={z} className={`risk-tag ${['STR','Y1'].includes(z) ? 'warn' : ''}`}>{z}</div>
-               ))}
-             </div>
-          </div>
+                {Object.entries(MOCK_RISK_DATA).sort(([,a],[,b]) => b.score - a.score).map(([zoneId, risk]) => {
+                    const zone = MOCK_ZONES.find(z => z.id === zoneId);
+                    const isSelected = zoneId === selectedZoneId;
+                    return (
+                        <div 
+                          key={zoneId} 
+                          className={`analysis-card risk ${isSelected ? 'active' : ''}`}
+                          onClick={() => {
+                            setSelectedZoneId(zoneId);
+                            // Optional: auto-centering could go here
+                          }}
+                        >
+                            <div className="card-top">
+                                <span className="zone-name">{zone?.name}</span>
+                                <span className={`risk-score-badge ${risk.status.toLowerCase()}`}>{risk.status}</span>
+                            </div>
+                            <div className="score-row">
+                                <span className="score-label">RISK SCORE: <span className="score-val">{risk.score}/100</span></span>
+                                <div className="score-bar-bg">
+                                    <div className={`score-bar-fill ${risk.status.toLowerCase()}`} style={{width:`${risk.score}%`}} />
+                                </div>
+                            </div>
+                            <div className="analysis-details">
+                                <div className="detail-section">
+                                    <div className="section-title"><AlertCircle size={10} /> RISK REASONS</div>
+                                    <ul className="detail-list reasons">
+                                        {risk.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                                    </ul>
+                                </div>
+                                <div className="detail-section">
+                                    <div className="section-title"><ShieldCheck size={10} /> RECOMMENDED ACTIONS</div>
+                                    <ul className="detail-list actions">
+                                        {risk.actions.map((a, i) => <li key={i}>{a}</li>)}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+                
+                <div className="analysis-summary">
+                    <div className="summary-row">
+                        <span>OVERALL PORT RISK</span>
+                        <span className="risk-level high">HIGH</span>
+                    </div>
+                    <div className="summary-bar-bg">
+                        <div className="summary-bar-fill high" style={{width:'72%'}} />
+                    </div>
+                    <div className="summary-labels">
+                        <span>Low</span>
+                        <span>72/100</span>
+                        <span>Critical</span>
+                    </div>
+                </div>
+            </div>
+          )}
+
+          {viewMode === 'ops' && (
+            <div className="sidebar-analysis-view scrollable">
+                <div className="analysis-header">
+                    <h3>Operation Intensity</h3>
+                    <p>Live worker density • equipment activity levels</p>
+                </div>
+
+                {Object.entries(MOCK_OPS_DATA).sort(([,a],[,b]) => b.intensity - a.intensity).map(([zoneId, ops]) => {
+                    const zone = MOCK_ZONES.find(z => z.id === zoneId);
+                    const isSelected = zoneId === selectedZoneId;
+                    return (
+                        <div 
+                          key={zoneId} 
+                          className={`analysis-card ops ${isSelected ? 'active' : ''}`}
+                          onClick={() => setSelectedZoneId(zoneId)}
+                        >
+                            <div className="card-top">
+                                <span className="zone-name">{zone?.name}</span>
+                                <div className={`trend-tag ${ops.trend}`}>
+                                    {ops.trend === 'up' && 'Increasing'}
+                                    {ops.trend === 'down' && 'Decreasing'}
+                                    {ops.trend === 'steady' && 'Stable'}
+                                </div>
+                            </div>
+                            <div className="intensity-row">
+                                <div className="intensity-dial">
+                                    <span className="intensity-val">{ops.intensity}</span>
+                                    <span className="intensity-unit">%</span>
+                                </div>
+                                <div className="intensity-meta">
+                                    <span className="meta-label">WORKFORCE</span>
+                                    <span className="meta-val">{zone?.workers} Active</span>
+                                </div>
+                            </div>
+                            <div className="ops-bar-bg">
+                                <div className="ops-bar-fill" style={{width:`${ops.intensity}%`}} />
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Footer Info */}
-      <div className="live-twin-footer">
-          <div className="f-left">Port Safety Digital Twin - v3.5.0</div>
-          <div className="f-center">
-             <span>AIS: <tspan className="green">Live</tspan></span>
-             <span>CCTV: <tspan className="green">32/34</tspan></span>
-             <span>IoT Sensors: <tspan className="green">316/350</tspan></span>
-             <span>Hazmat Detect: <tspan className="green">Active</tspan></span>
-             <span>Comms: <tspan className="green">Secure</tspan></span>
-          </div>
-          <div className="f-right">North Container Terminal - Port Klang</div>
       </div>
     </div>
   );
 }
+
+// ─── FULL DETAIL PANEL ──────────────────────────────────────────────────────
+const FullDetailPanel = ({ incident, onClose }) => {
+  const theme = incidentPalette[incident.severity];
+  
+  useEffect(() => {
+    anime({
+      targets: '.full-detail-card',
+      opacity: [0, 1],
+      translateY: [20, 0],
+      delay: anime.stagger(100),
+      duration: 600,
+      easing: 'easeOutQuart'
+    });
+  }, []);
+
+  return (
+    <div className="full-detail-overlay" onClick={onClose}>
+      <div className="full-detail-container" onClick={e => e.stopPropagation()}>
+        <div className="full-detail-header">
+          <div className="header-left">
+            <div className="severity-pulse" style={{ backgroundColor: theme.color }} />
+            <div className="header-meta">
+              <span className="incident-id">INC-{incident.id.toUpperCase()}</span>
+              <h2 className="incident-title">{incident.description}</h2>
+            </div>
+          </div>
+          <button className="close-btn" onClick={onClose}><X size={20} /></button>
+        </div>
+
+        <div className="full-detail-grid">
+          {/* Stats Card */}
+          <div className="full-detail-card stats-card">
+            <div className="card-header">
+              <Compass size={16} />
+              <span>Location & Time</span>
+            </div>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <span className="stat-label">DATE</span>
+                <span className="stat-value">{new Date().toLocaleDateString('en-GB')}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">TIME</span>
+                <span className="stat-value">{incident.time}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">ZONE</span>
+                <span className="stat-value">{incident.zone}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">SEVERITY</span>
+                <span className="stat-value" style={{ color: theme.color }}>{theme.label}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Narrative Card */}
+          <div className="full-detail-card narrative-card">
+            <div className="card-header">
+              <AlertCircle size={16} />
+              <span>Incident Narrative</span>
+            </div>
+            <p className="card-text">
+              {incident.description}. Preliminary reports indicate a potential safety violation in the {incident.zone} area. 
+              The HSEQ team has been notified and is currently on-site conducting a primary assessment.
+            </p>
+          </div>
+
+          {/* Actions Card */}
+          <div className="full-detail-card actions-card">
+            <div className="card-header">
+              <ShieldCheck size={16} />
+              <span>Immediate Actions Taken</span>
+            </div>
+            <ul className="actions-list">
+              <li>Exclusion zone established around {incident.zone}.</li>
+              <li>Operational activity halted in the affected quadrant.</li>
+              <li>Personnel evacuated to primary muster point.</li>
+              <li>Incident recorded in the digital logbook.</li>
+            </ul>
+          </div>
+
+          {/* Status Tracker */}
+          <div className="full-detail-card status-card">
+            <div className="card-header">
+              <Zap size={16} />
+              <span>Response Status</span>
+            </div>
+            <div className="status-timeline">
+              <div className="timeline-step completed">
+                <div className="step-dot" />
+                <div className="step-info">
+                  <span className="step-label">Reported</span>
+                  <span className="step-time">{incident.time}</span>
+                </div>
+              </div>
+              <div className="timeline-step active">
+                <div className="step-dot" />
+                <div className="step-info">
+                  <span className="step-label">Responding</span>
+                  <span className="step-time">In Progress</span>
+                </div>
+              </div>
+              <div className="timeline-step">
+                <div className="step-dot" />
+                <div className="step-info">
+                  <span className="step-label">Investigation</span>
+                  <span className="step-time">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="full-detail-footer">
+          <button className="btn-secondary" onClick={onClose}>CLOSE</button>
+          <button className="btn-primary">VIEW FULL REPORT</button>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -125,6 +125,28 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
   );
 };
 
+const PremiumAIButton = ({ onClick, tooltip, loading = false }) => (
+  <button 
+    className={`premium-ai-btn ${loading ? 'loading' : ''}`} 
+    onClick={onClick} 
+    title={tooltip}
+    disabled={loading}
+    type="button"
+  >
+    <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
+      <path
+        d="M14 2 C 14 2, 14.4 9.2, 19.8 14 C 14.4 18.8, 14 26, 14 26 C 14 26, 13.6 18.8, 8.2 14 C 13.6 9.2, 14 2, 14 2 Z"
+        fill="#6366f1"
+      />
+      <path
+        d="M2 14 C 2 14, 9.2 14.4, 14 19.8 C 14 13.6, 26 14, 26 14 C 26 14, 18.8 13.6, 14 8.2 C 9.2 13.6, 2 14, 2 14 Z"
+        fill="#6366f1"
+        opacity="0.65"
+      />
+    </svg>
+  </button>
+);
+
 const CreateIncident = ({ prefillData = null, prefillPersons = null }) => {
   const navigate = useNavigate();
 
@@ -691,9 +713,8 @@ const CreateIncident = ({ prefillData = null, prefillPersons = null }) => {
 
               <div className="narrative-grid">
                  <div className="narrative-box">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ marginBottom: '8px' }}>
                        <label className="field-label">Incident Description <span className="required-star">*</span></label>
-                       <div className="add-btn"><Languages size={14} /> Translate</div>
                     </div>
                     <textarea 
                        className={`field-textarea ${errors.description ? 'is-invalid' : ''}`}
@@ -705,9 +726,8 @@ const CreateIncident = ({ prefillData = null, prefillPersons = null }) => {
                     <div className="char-counter">{formData.description.length} / 3000</div>
                  </div>
                  <div className="narrative-box">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <div style={{ marginBottom: '8px' }}>
                        <label className="field-label">Immediate Action Taken</label>
-                       <div className="add-btn"><Languages size={14} /> Translate</div>
                     </div>
                     <textarea 
                        className="field-textarea" 
@@ -1053,11 +1073,18 @@ const UploadModal = ({ isOpen, onClose, onUpload, onAnalyze, isAnalyzing }) => {
         <div className="upload-modal-header">
           <div className="header-title">
             <div className="upload-icon-circle">
-               <Plus size={18} />
+               <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
+                 <path d="M14 2 C 14 2, 14.4 9.2, 19.8 14 C 14.4 18.8, 14 26, 14 26 C 14 26, 13.6 18.8, 8.2 14 C 13.6 9.2, 14 2, 14 2 Z" fill="#22d3ee" />
+                 <path d="M2 14 C 2 14, 9.2 14.4, 14 19.8 C 14 13.6, 26 14, 26 14 C 26 14, 18.8 13.6, 14 8.2 C 9.2 13.6, 2 14, 2 14 Z" fill="#22d3ee" opacity="0.65" />
+               </svg>
             </div>
             <span>Upload File</span>
           </div>
-          <Paperclip size={20} color="#94a3b8" />
+          <PremiumAIButton 
+            onClick={handleAIButtonClick} 
+            loading={isAnalyzing} 
+            tooltip="AI Scene Analysis"
+          />
         </div>
 
         <div className="upload-dropzone" onClick={() => fileInputRef.current?.click()}>
@@ -1070,7 +1097,10 @@ const UploadModal = ({ isOpen, onClose, onUpload, onAnalyze, isAnalyzing }) => {
             onChange={handleFileChange}
           />
           <div className="dropzone-content">
-            <Paperclip size={24} color="#94a3b8" />
+            <svg width="32" height="32" viewBox="0 0 28 28" fill="none" style={{ marginBottom: '8px' }}>
+              <path d="M14 2 C 14 2, 14.4 9.2, 19.8 14 C 14.4 18.8, 14 26, 14 26 C 14 26, 13.6 18.8, 8.2 14 C 13.6 9.2, 14 2, 14 2 Z" fill="#94a3b8" />
+              <path d="M2 14 C 2 14, 9.2 14.4, 14 19.8 C 14 13.6, 26 14, 26 14 C 26 14, 18.8 13.6, 14 8.2 C 9.2 13.6, 2 14, 2 14 Z" fill="#94a3b8" opacity="0.65" />
+            </svg>
             <p>{files.length > 0 ? `${files.length} file(s) selected` : 'Browse files or drag and drop your files'}</p>
           </div>
         </div>
@@ -1094,10 +1124,6 @@ const UploadModal = ({ isOpen, onClose, onUpload, onAnalyze, isAnalyzing }) => {
         <div className="modal-form-field">
           <div className="modal-label-row">
             <label className="modal-label">Description</label>
-            <div className="modal-label-actions">
-              <span>Translate</span>
-              <Languages size={14} />
-            </div>
           </div>
           <textarea 
             className="modal-textarea" 
@@ -1111,9 +1137,6 @@ const UploadModal = ({ isOpen, onClose, onUpload, onAnalyze, isAnalyzing }) => {
 
         <div className="modal-footer">
           <button className="modal-btn modal-btn-cancel" onClick={onClose} disabled={isAnalyzing}>CANCEL</button>
-          <button className="modal-btn modal-btn-ai" onClick={handleAIButtonClick} disabled={files.length === 0 || isAnalyzing}>
-            {isAnalyzing ? 'ANALYZING...' : '🤖 AI ANALYSIS'}
-          </button>
           <button className="modal-btn modal-btn-submit" onClick={handleModalSubmit} disabled={files.length === 0 || isAnalyzing}>SUBMIT</button>
         </div>
       </div>

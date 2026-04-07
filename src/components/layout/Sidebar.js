@@ -1,7 +1,6 @@
 import { 
   Eye, 
   FileText,
-  Box,
   Compass,
   ChevronRight, 
   ChevronLeft 

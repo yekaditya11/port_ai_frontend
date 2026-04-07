@@ -24,7 +24,7 @@
   padding: 24px;
   overflow-y: auto;
   margin-left: var(--sidebar-width-collapsed);
-  height: calc(100vh - var(--header-height));
+  height: calc(100vh - var(--header-height) - 32px); /* Account for global footer */
   transition: filter 0.3s ease;
 }
 
@@ -34,19 +34,20 @@
 }
 
 .shelf-open .content,
-.shelf-open .header {
-  filter: brightness(0.4);
+.shelf-open .global-footer {
+  /* Prevent pointer events when shelf is open, the overlay will handle the dimming cleanly */
   pointer-events: none;
 }
 
 .shelf-backdrop {
-  position: fixed;
+  position: absolute;
   top: 0;
-  left: 0;
+  left: var(--sidebar-width-collapsed);
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 75;
+  background-color: rgba(15, 23, 42, 0.4); /* Smooth Slate shading */
+  backdrop-filter: blur(2px);
+  z-index: 80;
 }
 
 /* ── Chat slide-in panel ── */
@@ -105,3 +106,22 @@ body.is-resizing {
   user-select: none;
   cursor: ew-resize !important;
 }
+
+/* ── Global Footer (Live Twin Theme) ── */
+.global-footer {
+  height: 32px;
+  background: #1e293b;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 9px;
+  font-weight: 500;
+  margin-left: var(--sidebar-width-collapsed);
+  z-index: 100;
+}
+
+.global-footer .f-center { display: flex; gap: 24px; }
+.global-footer .green { color: #10b981; font-weight: 800; margin-left: 4px; }
+

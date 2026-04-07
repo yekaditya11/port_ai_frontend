@@ -57,19 +57,20 @@ const DashboardLayout = ({ children }) => {
   };
 
   const toggleChat = () => setIsChatOpen((prev) => !prev);
-
+ 
   return (
     <div 
       className={`dashboard-layout ${isShelfOpen ? 'shelf-open' : ''} ${isChatOpen ? 'chat-open' : ''}`}
       style={{ '--dynamic-chat-width': `${chatWidth}px` }}
     >
-      {isShelfOpen && <div className="shelf-backdrop" onClick={() => toggleShelf(false)} />}
       <Sidebar
         onToggleShelf={toggleShelf}
         isShelfOpen={isShelfOpen}
         activeMenu={activeMenu}
       />
       <div className="main-container">
+        {isShelfOpen && <div className="shelf-backdrop" onClick={() => toggleShelf(false)} />}
+
         <Header onToggleChat={toggleChat} isChatOpen={isChatOpen} />
         {isShelfOpen && (
           <SubNavbar
@@ -81,6 +82,21 @@ const DashboardLayout = ({ children }) => {
         <main className={`content ${isFullBleed ? 'no-padding' : ''}`}>
           {children}
         </main>
+        
+        {/* ── Global Footer (Live Twin Theme) ── */}
+        {isFullBleed && (
+          <footer className="global-footer">
+            <div className="f-left">Port Safety Digital Twin - v3.5.0</div>
+            <div className="f-center">
+               <span>AIS: <span className="green">Live</span></span>
+               <span>CCTV: <span className="green">32/34</span></span>
+               <span>IoT Sensors: <span className="green">316/350</span></span>
+               <span>Hazmat Detect: <span className="green">Active</span></span>
+               <span>Comms: <span className="green">Secure</span></span>
+            </div>
+            <div className="f-right">North Container Terminal - Port Klang</div>
+          </footer>
+        )}
       </div>
 
       {/* ── Slide-in Chat Panel ── */}

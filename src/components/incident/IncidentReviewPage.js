@@ -282,17 +282,12 @@ const IncidentReviewPage = () => {
             className={`btn-ai-audit ${isAuditing ? 'analyzing' : ''}`}
             onClick={handleAiAudit}
             disabled={isAuditing}
+            title="AI Audit"
           >
             {isAuditing ? (
-              <>
-                <Loader size={12} color="#ffffff" />
-                <span>ANALYZING...</span>
-              </>
+              <Loader size={14} color="#00c4f4" />
             ) : (
-              <>
-                <Sparkles size={14} />
-                <span>AI AUDIT</span>
-              </>
+              <Sparkles size={18} color="#00c4f4" />
             )}
           </button>
         </div>
@@ -622,7 +617,6 @@ const IncidentReviewPage = () => {
                 <div className="rev-box">
                   <div className="rev-box-header">
                     <label className="rev-field-label">Incident Description <span className="required-star">*</span></label>
-                    <div className="rev-translate">Translate</div>
                   </div>
                   <textarea
                     className="rev-textarea"
@@ -634,7 +628,6 @@ const IncidentReviewPage = () => {
                 <div className="rev-box">
                   <div className="rev-box-header">
                     <label className="rev-field-label">Immediate Action Taken</label>
-                    <div className="rev-translate">Translate</div>
                   </div>
                   <textarea
                     className="rev-textarea"

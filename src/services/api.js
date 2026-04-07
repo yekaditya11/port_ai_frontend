@@ -28,7 +28,13 @@ async function apiFetch(endpoint, options = {}) {
 
 export const api = {
   // Dashboard
-  getDashboardStats: (days = 30) => apiFetch(`/dashboard/stats?days=${days}`),
+  getDashboardStats: (days = 30, startDate = null, endDate = null) => {
+    let url = `/dashboard/stats?days=${days}`;
+    if (startDate && endDate) {
+      url += `&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+    }
+    return apiFetch(url);
+  },
   getTrendStats: (days = 30) => apiFetch(`/dashboard/trend?days=${days}`),
 
   // Incidents
