@@ -3,7 +3,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: fixed;
   left: var(--sidebar-width-expanded);
-  right: 0;
+  width: fit-content;
+  max-width: calc(100vw - var(--sidebar-width-expanded) - 40px);
+  border-radius: 0 12px 12px 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -39,7 +41,6 @@
   padding: 12px 10px;
   overflow-x: auto;
   gap: 12px;
-  flex: 1;
   scrollbar-width: none; /* Hide scrollbar for clean look */
   -ms-overflow-style: none;
 }

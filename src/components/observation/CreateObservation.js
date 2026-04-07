@@ -810,7 +810,7 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
           >
             {analyzing
               ? <><Loader2 size={14} className="obs-animate-spin" style={{ display:'inline', marginRight: 6 }} />ANALYZING...</>
-              : '✨ ANALYSE WITH AI'
+              : 'ANALYSE WITH AI'
             }
           </button>
         </div>

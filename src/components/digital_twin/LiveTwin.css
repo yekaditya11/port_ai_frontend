@@ -2,7 +2,7 @@
 .live-twin-container.premium-theme {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     width: 100%;
     background: #f8fafc;
     font-family: 'Inter', -apple-system, system-ui, sans-serif;

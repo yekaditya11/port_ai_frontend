@@ -2,6 +2,7 @@ import {
   Eye, 
   FileText,
   Box,
+  Compass,
   ChevronRight, 
   ChevronLeft 
 } from 'lucide-react';
@@ -11,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 const Sidebar = ({ onToggleShelf, isShelfOpen, activeMenu }) => {
   const navigate = useNavigate();
   const menuItems = [
-    { icon: <Box size={20} />, label: 'Live Twin', path: '/digital-twin' },
+    { icon: <Compass size={20} />, label: 'Live Twin', path: '/digital-twin' },
     { icon: <Eye size={20} />, label: 'Observation', hasShelf: true },
     { icon: <FileText size={20} />, label: 'Incident Management', hasShelf: true },
   ];

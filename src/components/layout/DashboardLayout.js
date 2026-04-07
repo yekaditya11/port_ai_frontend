@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import SubNavbar from '../dashboard/SubNavbar';
 import ChatAI from '../chat/ChatAI';
+import { useLocation } from 'react-router-dom';
 import './DashboardLayout.css';
 
 const DashboardLayout = ({ children }) => {
@@ -10,6 +11,8 @@ const DashboardLayout = ({ children }) => {
   const [shelfTop, setShelfTop] = useState(0);
   const [activeMenu, setActiveMenu] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const location = useLocation();
+  const isFullBleed = location.pathname === '/digital-twin';
 
   const toggleShelf = (open, top = 0, menuLabel = null) => {
     setIsShelfOpen(open);
@@ -36,7 +39,7 @@ const DashboardLayout = ({ children }) => {
             menuType={activeMenu}
           />
         )}
-        <main className="content">
+        <main className={`content ${isFullBleed ? 'no-padding' : ''}`}>
           {children}
         </main>
       </div>

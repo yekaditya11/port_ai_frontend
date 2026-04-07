@@ -177,8 +177,6 @@ export default function LiveTwin() {
     return timelineProgress >= act.start;
   }).reverse();
 
-  const activeAlertCount = filteredIncidents.filter(i => i.severity === 'critical' || i.severity === 'high').length;
-
   // Top Alert Logic
   const topAlert = useMemo(() => {
     if (filteredIncidents.length === 0) return null;
@@ -212,7 +210,6 @@ export default function LiveTwin() {
         setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }));
         setTimelineProgress(100);
       } else {
-        // Map 0-100 to (Now - 10h) through (Now)
         const now = new Date();
         const startOfWindow = new Date(now.getTime() - 10 * 60 * 60 * 1000);
         const targetTime = new Date(startOfWindow.getTime() + (timelineProgress / 100) * 10 * 60 * 60 * 1000);
@@ -224,7 +221,6 @@ export default function LiveTwin() {
 
   // Animations (Radar & Continuous)
   useEffect(() => {
-    // 1. Radar Sweep
     const sweep = radarRef.current?.querySelector(".radar-sweep");
     if (sweep) {
         anime({
@@ -236,7 +232,6 @@ export default function LiveTwin() {
         });
     }
 
-    // 2. Continuous Vessel Drift (Subtle)
     anime({
       targets: '.vessel-node',
       translateY: [0, -2, 0],
@@ -250,7 +245,6 @@ export default function LiveTwin() {
 
   // Incident Pulsing (Stable)
   useEffect(() => {
-    // Pulse all current markers
     const markers = document.querySelectorAll('.incident-pulse-ring');
     if (markers.length > 0) {
         anime({
@@ -311,62 +305,7 @@ export default function LiveTwin() {
 
   return (
     <div className="live-twin-container premium-theme" onMouseDown={() => isPlaying && setIsPlaying(false)}>
-      {/* ── TOP SECONDARY NAV ── */}
-      <div className="live-twin-subnav">
-         <div className="subnav-left">
-            <div className="brand-pill">
-                <div className="brand-dot" />
-                <span>Port AI</span>
-                <span className="brand-sep">|</span>
-                <span className="brand-title">PORT DIGITAL TWIN</span>
-            </div>
-         </div>
-
-         <div className="subnav-center">
-            <div className={`alert-marquee ${topAlert ? topAlert.severity : 'normal'}`}>
-               <div className="marquee-icon">
-                 {topAlert?.severity === 'critical' ? <Zap size={12} fill="white" /> : 
-                  topAlert?.severity === 'high' ? <AlertCircle size={12} fill="white" /> :
-                  <ShieldCheck size={12} fill="white" />}
-               </div>
-               <span className="marquee-text">
-                 {topAlert ? 
-                   `${topAlert.description}` : 
-                   "System Monitoring Active — Normal Port Operations"}
-               </span>
-            </div>
-         </div>
-
-         <div className="subnav-right">
-            <div className="header-kpis">
-                <div className="header-kpi">
-                   <span className="kpi-val">5</span>
-                   <span className="kpi-lab">Vessels</span>
-                </div>
-                <div className="header-kpi">
-                   <span className="kpi-val">165</span>
-                   <span className="kpi-lab">On-site</span>
-                </div>
-                <div className="header-kpi">
-                   <span className="kpi-val red">{activeAlertCount}</span>
-                   <span className="kpi-lab">Active Alerts</span>
-                </div>
-                <div className="header-kpi">
-                   <span className="kpi-val">8/9</span>
-                   <span className="kpi-lab">Cranes</span>
-                </div>
-                <div className="header-kpi header-utc">
-                   <span className="kpi-val tiny">UTC +8</span>
-                   <span className="kpi-lab">Historical</span>
-                </div>
-            </div>
-            <div className="clock-box">
-                <div className="time">{currentTime}</div>
-                <div className="date">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-            </div>
-         </div>
-      </div>
-
+      
       <div className="live-twin-main">
         {/* ── MAP VIEWPORT ── */}
         <div 
@@ -484,7 +423,6 @@ export default function LiveTwin() {
                 <rect width={120} height={170} rx={8} fill="rgba(255,255,255,0.9)" stroke="#e2e8f0" strokeWidth={1} />
                 <text x={10} y={20} fill={C.textMuted} fontSize={8} fontWeight="900" letterSpacing={1}>LEGEND</text>
                 
-                {/* Vessels */}
                 <g transform="translate(10, 35)">
                     {[{l:'Container Vessel', c:C.violet}, {l:'Tanker Vessel', c:C.orange}, {l:'Bulk Vessel', c:C.sky}, {l:'Ferry Vessel', c:C.emerald}].map((v, i) => (
                         <g key={v.l} transform={`translate(0, ${i * 15})`}>
@@ -494,7 +432,6 @@ export default function LiveTwin() {
                     ))}
                 </g>
 
-                {/* Incidents */}
                 <g transform="translate(10, 110)">
                     {[{l:'Critical Incident', c:C.rose}, {l:'High Incident', c:C.orange}, {l:'Medium Incident', c:C.amber}].map((v, i) => (
                         <g key={v.l} transform={`translate(0, ${i * 15})`}>
@@ -505,7 +442,6 @@ export default function LiveTwin() {
                 </g>
             </g>
 
-            {/* Map Accents */}
             <g transform="translate(30, 500)">
                <line x1={0} y1={0} x2={40} y2={0} stroke={C.textMuted} strokeWidth={1} />
                <line x1={0} y1={-3} x2={0} y2={3} stroke={C.textMuted} strokeWidth={1} />
@@ -522,7 +458,6 @@ export default function LiveTwin() {
                <text x={-18} y={2} textAnchor="end" fill={C.textMuted} fontSize={7} fontWeight="900">W</text>
             </g>
 
-            {/* HUD Overlays */}
             {selectedIncident && (
                 <g transform={`translate(${selectedIncident.x + 20}, ${selectedIncident.y - 60})`}>
                     <rect width={160} height={70} rx={8} fill="white" filter="url(#shadow)" stroke={incidentPalette[selectedIncident.severity].color} strokeWidth={1} />
@@ -536,7 +471,6 @@ export default function LiveTwin() {
             )}
           </svg>
 
-          {/* Historical Ribbon Overlay */}
           { !isLive && (
             <div className="historical-overlay">
                 <div className="historical-pill">
@@ -546,7 +480,6 @@ export default function LiveTwin() {
             </div>
           )}
 
-          {/* Bottom Time Bar */}
           <div className="timeline-bar" onMouseDown={e => e.stopPropagation()}>
             <div className="timeline-controls">
                 <button className="ctrl-btn" onClick={() => { setIsLive(false); setTimelineProgress(Math.max(0, timelineProgress - 10)); }}><SkipBack size={16} /></button>
@@ -572,7 +505,6 @@ export default function LiveTwin() {
                     <div className="track-bg" />
                     <div className={`track-progress ${isLive ? 'live' : 'review'}`} style={{ width: `${timelineProgress}%` }} />
                     <div className={`track-thumb ${isLive ? 'live' : 'review'}`} style={{ left: `${timelineProgress}%` }} />
-                    {/* Markers */}
                     {data.incidents.map(inc => (
                         <div key={inc.id} className="track-marker" style={{ left: `${inc.start}%`, background: incidentPalette[inc.severity].color }} />
                     ))}

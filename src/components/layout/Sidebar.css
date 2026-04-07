@@ -24,12 +24,19 @@
 
 .sidebar-logo {
   height: var(--header-height);
-  padding: 0 20px;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-svg {
+  width: var(--sidebar-width-collapsed);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -59,11 +66,11 @@
   height: 48px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0;
   color: rgba(255, 255, 255, 0.8);
-  gap: 16px;
   transition: all 0.2s;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .nav-item:hover {
@@ -81,7 +88,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
+  width: var(--sidebar-width-collapsed);
 }
 
 .nav-label {
@@ -89,7 +96,8 @@
   font-weight: 500;
   opacity: 0;
   transition: opacity 0.2s ease;
-  flex: 1; /* Pushes chevron to the right */
+  flex: 1;
+  padding-left: 8px; /* Gap between icon and text when expanded */
 }
 
 .sidebar:hover .nav-label,
@@ -101,6 +109,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px; /* Space for chevron when expanded */
   opacity: 0;
   transition: opacity 0.2s ease;
 }
