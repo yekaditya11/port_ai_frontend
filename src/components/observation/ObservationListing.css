@@ -168,28 +168,34 @@
 .col-timer { flex: 0 0 8%; align-items: center; }
 .col-menu { flex: 0 0 2%; align-items: flex-end; }
 
-/* Micro Typography */
-.obs-row-title {
+/* ── Row cell typography — two consistent tiers ── */
+.obs-cell-primary {
   font-size: 12px;
-  font-weight: 700;
-  color: #333;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
 }
 
-.obs-row-sub {
+.obs-cell-secondary {
   font-size: 11px;
+  font-weight: 400;
   color: #64748b;
   display: flex;
   align-items: center;
   gap: 4px;
+  line-height: 1.4;
 }
 
-.obs-link {
+/* Ref link — primary tier with brand colour */
+.obs-cell-ref {
+  font-size: 12px;
+  font-weight: 700;
   color: #0ea5e9;
-  font-weight: 600;
   cursor: pointer;
+  line-height: 1.4;
 }
 
-.obs-link:hover {
+.obs-cell-ref:hover {
   text-decoration: underline;
 }
 
@@ -197,13 +203,25 @@
   color: #94a3b8;
 }
 
-.obs-row-icons {
-  display: flex;
-  flex-direction: column;
+/* ── Status badge ── */
+.status-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 'auto';
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
 }
+
+.status-new          { background: #eff6ff; color: #2563eb; }
+.status-review       { background: #fefce8; color: #ca8a04; }
+.status-inspection   { background: #f0fdf4; color: #16a34a; }
+.status-investigation{ background: #fff7ed; color: #ea580c; }
+.status-closed       { background: #f1f5f9; color: #475569; }
 
 /* Load More */
 .obs-load-more {

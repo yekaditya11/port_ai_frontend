@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import SubNavbar from '../dashboard/SubNavbar';
@@ -14,6 +14,42 @@ const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const isFullBleed = location.pathname === '/digital-twin';
 
+  // ── Drag to Resize Chat Panel ──
+  const [chatWidth, setChatWidth] = useState(420); // Default 420px
+  const isResizingRef = useRef(false);
+
+  const startResizing = useCallback(() => {
+    isResizingRef.current = true;
+    document.body.classList.add('is-resizing');
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    isResizingRef.current = false;
+    document.body.classList.remove('is-resizing');
+  }, []);
+
+  const resize = useCallback((e) => {
+    if (!isResizingRef.current) return;
+    
+    let newWidth = window.innerWidth - e.clientX;
+    const maxWidth = window.innerWidth * 0.5; // Max 50%
+    const minWidth = 320; // Min 320px
+    
+    if (newWidth > maxWidth) newWidth = maxWidth;
+    if (newWidth < minWidth) newWidth = minWidth;
+    
+    setChatWidth(newWidth);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
+
   const toggleShelf = (open, top = 0, menuLabel = null) => {
     setIsShelfOpen(open);
     if (top) setShelfTop(top);
@@ -23,7 +59,10 @@ const DashboardLayout = ({ children }) => {
   const toggleChat = () => setIsChatOpen((prev) => !prev);
 
   return (
-    <div className={`dashboard-layout ${isShelfOpen ? 'shelf-open' : ''} ${isChatOpen ? 'chat-open' : ''}`}>
+    <div 
+      className={`dashboard-layout ${isShelfOpen ? 'shelf-open' : ''} ${isChatOpen ? 'chat-open' : ''}`}
+      style={{ '--dynamic-chat-width': `${chatWidth}px` }}
+    >
       {isShelfOpen && <div className="shelf-backdrop" onClick={() => toggleShelf(false)} />}
       <Sidebar
         onToggleShelf={toggleShelf}
@@ -46,6 +85,7 @@ const DashboardLayout = ({ children }) => {
 
       {/* ── Slide-in Chat Panel ── */}
       <div className={`chat-panel ${isChatOpen ? 'chat-panel--open' : ''}`}>
+        <div className="chat-resizer" onMouseDown={startResizing} />
         <ChatAI isPanel onClose={toggleChat} />
       </div>
     </div>

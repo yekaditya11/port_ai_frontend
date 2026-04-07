@@ -16,7 +16,7 @@
 
 /* Shrink main content when chat panel is open */
 .chat-open .main-container {
-  margin-right: var(--chat-panel-width, 420px);
+  margin-right: var(--dynamic-chat-width, var(--chat-panel-width, 420px));
 }
 
 .content {
@@ -58,7 +58,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: var(--chat-panel-width);
+  width: var(--dynamic-chat-width, var(--chat-panel-width));
   height: 100vh;
   background: #f0f2f5;
   border-left: 1px solid #e0e4f0;
@@ -72,4 +72,36 @@
 
 .chat-panel--open {
   transform: translateX(0);
+}
+
+/* ── Resizer ── */
+.chat-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  width: 8px;
+  cursor: ew-resize;
+  z-index: 201;
+}
+
+.chat-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.chat-resizer:hover::after,
+body.is-resizing .chat-resizer::after {
+  background-color: var(--primary, #0D6EFD);
+}
+
+body.is-resizing {
+  user-select: none;
+  cursor: ew-resize !important;
 }

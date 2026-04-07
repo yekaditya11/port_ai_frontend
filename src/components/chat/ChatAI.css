@@ -295,7 +295,11 @@
 .message-body {
   display: flex;
   flex-direction: column;
-  max-width: 75%;
+  max-width: 80%;
+}
+
+.ai-row .message-body {
+  max-width: 90%; 
 }
 
 .message-row.user-row .message-body {
@@ -306,6 +310,49 @@
 .chat-answer-text {
   margin: 0 0 10px;
   line-height: 1.65;
+}
+
+/* ── Combined View Toggle ── */
+.chat-combined-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #e4e8f0;
+  background: #f8f9fa;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.view-toggle-btn:hover {
+  background: #f0f2f5;
+  color: #374151;
+}
+
+.view-toggle-btn.active {
+  background: rgba(79, 110, 247, 0.1);
+  border-color: rgba(79, 110, 247, 0.3);
+  color: #4f6ef7;
+}
+
+.chat-view-content {
+  animation: fadeSlideUp 0.2s ease;
 }
 
 /* ── Data table ── */
