@@ -1,96 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronDown, ChevronUp, Calendar, Search, Settings, 
   X, Eye
 } from 'lucide-react';
+import { api } from '../../services/api';
 import './ObservationClosure.css';
 import '../common/DateRangePicker.css';
 
 const ObservationClosure = () => {
-  const initialData = [
-    {
-      id: "OBR/0325/3891",
-      group: "Assets",
-      observer: "Martin Debeloz",
-      obsDate: "24 Mar 2026", obsTime: "20:49",
-      recDate: "24 Mar 2026", recTime: "20:49",
-      location: "Admin. Building",
-      bu: "Global Container...",
-      category: "Property Damage",
-      status: "Closed"
-    },
-    {
-      id: "OBR/0325/3891",
-      group: "Assets",
-      observer: "Martin Debeloz",
-      obsDate: "24 Mar 2026", obsTime: "20:49",
-      recDate: "24 Mar 2026", recTime: "20:49",
-      location: "Admin. Building",
-      bu: "Global Container...",
-      category: "Property Damage",
-      status: "Closed"
-    },
-    {
-      id: "OBR/0325/3891",
-      group: "Assets",
-      observer: "Martin Debeloz",
-      obsDate: "24 Mar 2026", obsTime: "20:49",
-      recDate: "24 Mar 2026", recTime: "20:49",
-      location: "Admin. Building",
-      bu: "Global Container...",
-      category: "Property Damage",
-      status: "Closed"
-    },
-    {
-      id: "OBR/0325/3891",
-      group: "Assets",
-      observer: "Martin Debeloz",
-      obsDate: "24 Mar 2026", obsTime: "20:49",
-      recDate: "24 Mar 2026", recTime: "20:49",
-      location: "Admin. Building",
-      bu: "Global Container...",
-      category: "Property Damage",
-      status: "Closed"
-    }
-  ];
+  const [listData, setListData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const newData = [
-    {
-      id: "OBR/0325/3840",
-      group: "Unsafe Behavior",
-      observer: "Martin Debeloz",
-      obsDate: "16 Mar 2026", obsTime: "14:41",
-      recDate: "16 Mar 2026", recTime: "20:11",
-      location: "Bilge Facility",
-      bu: "Global Container...",
-      category: "Safety",
-      status: "Closed"
-    },
-    {
-      id: "OBR/0325/3840",
-      group: "Unsafe Behavior",
-      observer: "Martin Debeloz",
-      obsDate: "16 Mar 2026", obsTime: "14:41",
-      recDate: "16 Mar 2026", recTime: "20:11",
-      location: "Bilge Facility",
-      bu: "Global Container...",
-      category: "Safety",
-      status: "Closed"
-    },
-    {
-      id: "OBR/0325/3829",
-      group: "Unsafe Condition",
-      observer: "Martin Debeloz",
-      obsDate: "13 Mar 2026", obsTime: "12:29",
-      recDate: "13 Mar 2026", recTime: "12:29",
-      location: "Gate",
-      bu: "Global Container...",
-      category: "Unsafe Condition",
-      status: "Closed"
-    }
-  ];
-
-  const [listData, setListData] = useState(initialData);
+  useEffect(() => {
+    const fetchClosedObservations = async () => {
+      setLoading(true);
+      try {
+        const result = await api.getObservations({ status: 'Closed' });
+        setListData(result.items || result);
+      } catch (err) {
+        console.error("Failed to fetch closed observations:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClosedObservations();
+  }, []);
   const [hasLoadedMore, setHasLoadedMore] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -106,10 +40,7 @@ const ObservationClosure = () => {
     return `${date.getDate()} ${months[date.getMonth()]}`;
   };
 
-  const handleLoadMore = () => {
-    setListData([...listData, ...newData]);
-    setHasLoadedMore(true);
-  };
+
 
   return (
     <div className="obs-closure-container">
@@ -243,25 +174,27 @@ const ObservationClosure = () => {
           <div className="obs-closure-header-cell col-status">STATUS</div>
           <div className="obs-closure-header-cell col-action"></div>
         </div>
-        {listData.map((row, idx) => (
-          <div key={idx} className="obs-closure-row">
-            <div className="obs-closure-cell col-id link">{row.id}</div>
-            <div className="obs-closure-cell col-group">{row.group}</div>
-            <div className="obs-closure-cell col-observer bold">{row.observer}</div>
-            <div className="obs-closure-cell col-obs-date"><span>{row.obsDate}</span><span>{row.obsTime}</span></div>
-            <div className="obs-closure-cell col-rec-date"><span>{row.recDate}</span><span>{row.recTime}</span></div>
-            <div className="obs-closure-cell col-loc">{row.location}</div>
-            <div className="obs-closure-cell col-bu">{row.bu}</div>
-            <div className="obs-closure-cell col-cat">{row.category}</div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>Loading closed observations...</div>
+        ) : listData.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>No closed observations found.</div>
+        ) : listData.map((row, idx) => (
+          <div key={row.id || idx} className="obs-closure-row">
+            <div className="obs-closure-cell col-id link">{row.observation_ref || '--'}</div>
+            <div className="obs-closure-cell col-group">{row.risk_category || '--'}</div>
+            <div className="obs-closure-cell col-observer bold">{row.observer_name || '--'}</div>
+            <div className="obs-closure-cell col-obs-date"><span>{formatDate(row.observed_date)}</span><span>{row.time_of_day || '--'}</span></div>
+            <div className="obs-closure-cell col-rec-date"><span>{formatDate(row.created_at || row.observed_date)}</span><span>{row.time_of_day || '--'}</span></div>
+            <div className="obs-closure-cell col-loc">{row.sub_area || row.area_of_observation || '--'}</div>
+            <div className="obs-closure-cell col-bu">{row.business_unit_name || '--'}</div>
+            <div className="obs-closure-cell col-cat">{row.observation_category || '--'}</div>
             <div className="obs-closure-cell col-status">{row.status}</div>
             <div className="obs-closure-cell col-action"><Eye size={16} className="obs-closure-action-icon" /></div>
           </div>
         ))}
       </div>
 
-      {!hasLoadedMore && (
-        <button className="obs-closure-load-more" onClick={handleLoadMore}>LOAD MORE</button>
-      )}
+
     </div>
   );
 };
