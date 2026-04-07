@@ -62,6 +62,9 @@ const Header = () => {
     } else if (path.includes('/reports/observation-list')) {
       breadcrumbLast = "Reports > List Report";
       pageTitle = "List Report";
+    } else if (path.includes('/reports/observer-performance')) {
+      breadcrumbLast = "Reports > Performance Report";
+      pageTitle = "Performance Report";
     } else if (path.includes('/configuration')) {
       breadcrumbLast = "Configuration";
       pageTitle = "Configuration";

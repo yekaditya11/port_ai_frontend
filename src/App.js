@@ -17,6 +17,7 @@ import ObservationListing from './components/observation/ObservationListing';
 import ObservationInspection from './components/observation/ObservationInspection';
 import ObservationClosure from './components/observation/ObservationClosure';
 import ObservationReview from './components/observation/ObservationReview';
+import ObservationDetailView from './components/observation/ObservationDetailView';
 import ObservationAction from './components/observation/ObservationAction';
 import ObservationRCA from './components/observation/ObservationRCA';
 import ObservationAnalyzer from './components/observation/ObservationAnalyzer';
@@ -25,6 +26,7 @@ import ObservationLog from './components/observation/ObservationLog';
 import ObservationConfiguration from './components/observation/ObservationConfiguration';
 import DensityReport from './components/observation/reports/DensityReport';
 import ListReport from './components/observation/reports/ListReport';
+import PerformanceReport from './components/observation/reports/PerformanceReport';
 
 function App() {
   return (
@@ -50,6 +52,7 @@ function App() {
           <Route path="/observation/inspection" element={<ObservationInspection />} />
           <Route path="/observation/closure" element={<ObservationClosure />} />
           <Route path="/observation/review" element={<ObservationReview />} />
+          <Route path="/observation/review/:id" element={<ObservationDetailView />} />
           <Route path="/observation/action" element={<ObservationAction />} />
           <Route path="/observation/root-cause" element={<ObservationRCA />} />
           <Route path="/observation/analyser" element={<ObservationAnalyzer />} />
@@ -57,6 +60,7 @@ function App() {
           <Route path="/observation/observation-log" element={<ObservationLog />} />
           <Route path="/observation/reports/density-report" element={<DensityReport />} />
           <Route path="/observation/reports/observation-list" element={<ListReport />} />
+          <Route path="/observation/reports/observer-performance" element={<PerformanceReport />} />
           <Route path="/observation/configuration" element={<ObservationConfiguration />} />
         </Routes>
       </DashboardLayout>
