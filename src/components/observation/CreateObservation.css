@@ -673,3 +673,103 @@
   color: #dc2626;
   border: 1px solid #fecaca;
 }
+
+/* ── AI Analysis Overlay (on main form) ── */
+.ai-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(248, 250, 252, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  animation: ai-overlay-in 0.3s ease;
+}
+
+@keyframes ai-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ai-overlay-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  min-width: 320px;
+}
+
+.ai-overlay-spinner {
+  color: #6366f1;
+}
+
+.ai-overlay-phase {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: ai-phase-fade 0.4s ease;
+}
+
+@keyframes ai-phase-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ai-phase-icon {
+  font-size: 22px;
+}
+
+.ai-phase-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.ai-overlay-steps {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.ai-step-dot.active {
+  background: #6366f1;
+  transform: scale(1.25);
+}
+
+.ai-overlay-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ── AI Error Banner ── */
+.ai-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #dc2626;
+  animation: ai-overlay-in 0.3s ease;
+}
+
