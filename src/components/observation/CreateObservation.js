@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
+import {
   ArrowUpFromLine, Languages, Plus, Video, X, Loader2, MapPin,
   ChevronDown, Clock, PlusCircle, Paperclip
 } from 'lucide-react';
@@ -68,8 +68,8 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
         {required && <span className="obs-required">*</span>}
       </label>
       <div className="obs-input-wrapper">
-        <div 
-          className={`obs-input obs-dropdown-trigger ${isOpen ? 'is-open' : ''} ${disabled ? 'disabled' : ''}`} 
+        <div
+          className={`obs-input obs-dropdown-trigger ${isOpen ? 'is-open' : ''} ${disabled ? 'disabled' : ''}`}
           onClick={handleToggle}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: disabled ? 'not-allowed' : 'pointer' }}
         >
@@ -78,19 +78,19 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
           </span>
           <ChevronDown size={14} color="#94a3b8" />
         </div>
-        
+
         {isOpen && (
           <div className="obs-dropdown-menu">
             {options.map(option => (
-              <div 
-                key={getOptionKey(option)} 
+              <div
+                key={getOptionKey(option)}
                 className={`obs-dropdown-option ${isOptionSelected(option) ? 'is-selected' : ''}`}
                 onClick={() => handleSelect(option)}
               >
                 {multi && (
-                  <input 
-                    type="checkbox" 
-                    className="obs-dropdown-checkbox" 
+                  <input
+                    type="checkbox"
+                    className="obs-dropdown-checkbox"
                     checked={isOptionSelected(option)}
                     readOnly
                   />
@@ -108,6 +108,15 @@ const AppDropdown = ({ label, options = [], value, onChange, multi = false, requ
   );
 };
 
+// ── AI Analysis phase messages ──
+const AI_PHASES = [
+  { text: 'Uploading file...', icon: '📤' },
+  { text: 'Analyzing media with AI...', icon: '🔍' },
+  { text: 'Generating insights...', icon: '🧠' },
+  { text: 'Filling form fields...', icon: '✍️' },
+  { text: 'Almost done...', icon: '✨' },
+];
+
 const CreateObservation = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isNearMiss, setIsNearMiss] = useState(false);
@@ -120,6 +129,20 @@ const CreateObservation = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // --- AI ANALYSIS STATE (shown on main form) ---
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [aiPhaseIndex, setAiPhaseIndex] = useState(0);
+  const [aiError, setAiError] = useState(null);
+
+  // Cycle through AI phase messages every 3 seconds
+  useEffect(() => {
+    if (!aiAnalyzing) { setAiPhaseIndex(0); return; }
+    const interval = setInterval(() => {
+      setAiPhaseIndex(prev => (prev < AI_PHASES.length - 1 ? prev + 1 : prev));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [aiAnalyzing]);
 
   const now = new Date();
   const currentDate = now.toISOString().split('T')[0];
@@ -155,6 +178,48 @@ const CreateObservation = () => {
 
   const [attachments, setAttachments] = useState([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  // Called by UploadModal — closes modal, runs AI on main form
+  const handleAIAnalyze = async (file, description) => {
+    setIsUploadModalOpen(false); // close modal immediately
+    setAiAnalyzing(true);
+    setAiError(null);
+    try {
+      const fd = new FormData();
+      fd.append('files', file);
+      if (description && description.trim()) fd.append('description', description.trim());
+      const suggestions = await api.analyzeObservation(fd);
+      if (suggestions.error) throw new Error(suggestions.message || suggestions.error);
+      // Prefill form
+      setFormData(prev => ({
+        ...prev,
+        area: suggestions.area_of_observation ?? prev.area,
+        sub_area: suggestions.sub_area ?? prev.sub_area,
+        business_unit: suggestions.business_unit ?? prev.business_unit,
+        department: suggestions.department ?? prev.department,
+        designation: suggestions.designation ?? prev.designation,
+        operational_activity: suggestions.operational_activity ?? prev.operational_activity,
+        operational_department: suggestions.operational_department ?? prev.operational_department,
+        observation_group: suggestions.observation_group ?? prev.observation_group,
+        specific_detail: suggestions.specific_detail ?? prev.specific_detail,
+        description: suggestions.description ?? prev.description,
+        weather: suggestions.weather ?? prev.weather,
+        observation_type: suggestions.observation_type ?? prev.observation_type,
+        potential_severity: suggestions.potential_severity ?? prev.potential_severity,
+        observation_category: suggestions.observation_category ?? prev.observation_category,
+        hazard_category: suggestions.hazard_category ?? prev.hazard_category,
+        risk_category: suggestions.risk_category ?? prev.risk_category,
+        immediate_action: suggestions.immediate_action ?? prev.immediate_action,
+        time_of_day: suggestions.time_of_day ?? prev.time_of_day,
+        shift: suggestions.shift ?? prev.shift,
+      }));
+      if (suggestions.near_miss !== undefined) setIsNearMiss(suggestions.near_miss);
+    } catch (err) {
+      setAiError(err.message || 'AI analysis failed. Please fill the form manually.');
+    } finally {
+      setAiAnalyzing(false);
+    }
+  };
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -203,7 +268,7 @@ const CreateObservation = () => {
     if (!formData.specific_detail) newErrors.specific_detail = 'Specific Detail is required.';
     if (!formData.description) newErrors.description = 'Description is required.';
     if (!isConfirmed) newErrors.confirmation = 'Reporter confirmation is required.';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -309,7 +374,36 @@ const CreateObservation = () => {
   }
 
   return (
-    <div className="create-obs-container">
+    <div className="create-obs-container" style={{ position: 'relative' }}>
+      {/* ── AI Analysis Overlay ── */}
+      {aiAnalyzing && (
+        <div className="ai-overlay">
+          <div className="ai-overlay-card">
+            <div className="ai-overlay-spinner">
+              <Loader2 size={40} className="obs-animate-spin" />
+            </div>
+            <div className="ai-overlay-phase">
+              <span className="ai-phase-icon">{AI_PHASES[aiPhaseIndex].icon}</span>
+              <span className="ai-phase-text">{AI_PHASES[aiPhaseIndex].text}</span>
+            </div>
+            <div className="ai-overlay-steps">
+              {AI_PHASES.map((phase, i) => (
+                <div key={i} className={`ai-step-dot ${i <= aiPhaseIndex ? 'active' : ''}`} />
+              ))}
+            </div>
+            <p className="ai-overlay-hint">Please wait while AI processes your file</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── AI Error Banner ── */}
+      {aiError && (
+        <div className="ai-error-banner">
+          <span>⚠️ {aiError}</span>
+          <X size={14} style={{ cursor: 'pointer', flexShrink: 0 }} onClick={() => setAiError(null)} />
+        </div>
+      )}
+
       <div className="obs-header">
         <h2 className="obs-title">New Observation</h2>
       </div>
@@ -326,9 +420,9 @@ const CreateObservation = () => {
         </div>
         <div className="obs-field">
           <label className="obs-label">Reported Date<span className="obs-required">*</span></label>
-          <input 
-            type="date" 
-            className="obs-input" 
+          <input
+            type="date"
+            className="obs-input"
             value={formData.reported_date}
             onChange={(e) => handleValueChange('reported_date', e.target.value)}
           />
@@ -336,17 +430,17 @@ const CreateObservation = () => {
         <div className="obs-field">
           <label className="obs-label">Reported Time <span className="obs-required">*</span></label>
           <div className="obs-input-wrapper">
-            <input 
-              type="text" 
-              className="obs-input" 
+            <input
+              type="text"
+              className="obs-input"
               value={formData.reported_time}
               onChange={(e) => handleValueChange('reported_time', e.target.value)}
             />
             <Clock className="obs-icon-right" size={16} />
           </div>
         </div>
-        
-        <AppDropdown 
+
+        <AppDropdown
           label="Video Feed"
           options={['CCTV 1', 'CCTV 2', 'Mobile Camera']}
           value={formData.video_feed}
@@ -358,7 +452,7 @@ const CreateObservation = () => {
       <div className="obs-toggles-row">
         <div className="obs-toggle-group">
           <span className="obs-label">Anonymous</span>
-          <div 
+          <div
             className={`obs-toggle-switch ${isAnonymous ? 'active' : ''}`}
             onClick={() => setIsAnonymous(!isAnonymous)}
           >
@@ -366,9 +460,9 @@ const CreateObservation = () => {
           </div>
         </div>
         <div className="obs-checkbox-group">
-          <input 
-            type="checkbox" 
-            className="obs-checkbox" 
+          <input
+            type="checkbox"
+            className="obs-checkbox"
             checked={isNearMiss}
             onChange={() => setIsNearMiss(!isNearMiss)}
           />
@@ -378,28 +472,28 @@ const CreateObservation = () => {
 
       {/* Row 3 */}
       <div className="obs-grid-5">
-        <AppDropdown 
+        <AppDropdown
           label="Time of Day"
           options={enums.time_of_day?.map(opt => opt.value) || enums.time_of_day || []}
           value={formData.time_of_day}
           onChange={(val) => handleValueChange('time_of_day', val)}
         />
-        
-        <AppDropdown 
+
+        <AppDropdown
           label="Shift"
           options={enums.shift?.map(opt => opt.value) || enums.shift || []}
           value={formData.shift}
           onChange={(val) => handleValueChange('shift', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Operational Department"
           options={enums.operational_department?.map(opt => opt.value) || enums.operational_department || []}
           value={formData.operational_department}
           onChange={(val) => handleValueChange('operational_department', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Area"
           required
           error={errors.area}
@@ -408,7 +502,7 @@ const CreateObservation = () => {
           onChange={(val) => handleValueChange('area', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Sub Area"
           icon={MapPin}
           options={subAreas}
@@ -419,7 +513,7 @@ const CreateObservation = () => {
 
       {/* Row 4 */}
       <div className="obs-grid-5">
-        <AppDropdown 
+        <AppDropdown
           label="Reported By"
           required
           disabled={isAnonymous}
@@ -428,7 +522,7 @@ const CreateObservation = () => {
           onChange={(val) => handleValueChange('reported_by', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Business Unit"
           required
           error={errors.business_unit}
@@ -438,7 +532,7 @@ const CreateObservation = () => {
           onChange={(val) => handleValueChange('business_unit', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Department"
           required
           error={errors.department}
@@ -448,7 +542,7 @@ const CreateObservation = () => {
           onChange={(val) => handleValueChange('department', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Designation"
           required
           error={errors.designation}
@@ -458,7 +552,7 @@ const CreateObservation = () => {
           onChange={(val) => handleValueChange('designation', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Weather"
           options={enums.weather?.map(opt => opt.value) || enums.weather || []}
           value={formData.weather}
@@ -468,14 +562,14 @@ const CreateObservation = () => {
 
       {/* Row 5 */}
       <div className="obs-grid-5">
-        <AppDropdown 
+        <AppDropdown
           label="Observation Type"
           options={enums.observation_type?.map(opt => opt.value) || []}
           value={formData.observation_type}
           onChange={(val) => handleValueChange('observation_type', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Operational Activity"
           required
           error={errors.operational_activity}
@@ -484,21 +578,21 @@ const CreateObservation = () => {
           onChange={(val) => handleValueChange('operational_activity', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Potential Severity"
           options={enums.severity_level}
           value={formData.potential_severity}
           onChange={(val) => handleValueChange('potential_severity', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Observation Category"
           options={enums.observation_category?.map(opt => opt.value) || []}
           value={formData.observation_category}
           onChange={(val) => handleValueChange('observation_category', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Hazard Category"
           options={enums.hazard_category?.map(opt => opt.value) || []}
           value={formData.hazard_category}
@@ -508,7 +602,7 @@ const CreateObservation = () => {
 
       {/* Row 6 */}
       <div className="obs-grid-5">
-        <AppDropdown 
+        <AppDropdown
           label="Observation Group"
           required
           error={errors.observation_group}
@@ -519,23 +613,23 @@ const CreateObservation = () => {
 
         <div className={`obs-field ${errors.specific_detail ? 'has-error' : ''}`}>
           <label className="obs-label">Specific Detail<span className="obs-required">*</span></label>
-          <input 
-            type="text" 
-            className="obs-input" 
+          <input
+            type="text"
+            className="obs-input"
             value={formData.specific_detail}
             onChange={(e) => handleValueChange('specific_detail', e.target.value)}
           />
           {errors.specific_detail && <span className="obs-error-message">{errors.specific_detail}</span>}
         </div>
 
-        <AppDropdown 
+        <AppDropdown
           label="Risk Category"
           options={enums.risk_category?.map(opt => opt.value) || []}
           value={formData.risk_category}
           onChange={(val) => handleValueChange('risk_category', val)}
         />
 
-        <AppDropdown 
+        <AppDropdown
           label="Repeated Observation Number"
           options={['None', 'OBS/2026/001', 'OBS/2026/042']}
           value={formData.repeated_number}
@@ -545,8 +639,8 @@ const CreateObservation = () => {
         <div className="obs-field">
           <label className="obs-label">Involved Personnel</label>
           <div className="obs-input-wrapper">
-             <div className="obs-input" style={{ backgroundColor: '#f8fafc', color: '#94a3b8' }}>Select</div>
-             <PlusCircle className="add-personnel-icon" size={16} />
+            <div className="obs-input" style={{ backgroundColor: '#f8fafc', color: '#94a3b8' }}>Select</div>
+            <PlusCircle className="add-personnel-icon" size={16} />
           </div>
         </div>
       </div>
@@ -556,7 +650,7 @@ const CreateObservation = () => {
         <div className="obs-field">
           <label className="obs-label">Description<span className="obs-required">*</span></label>
           <div className="obs-textarea-container">
-            <textarea 
+            <textarea
               className={`obs-textarea ${errors.description ? 'is-invalid' : ''}`}
               value={formData.description}
               onChange={(e) => handleValueChange('description', e.target.value)}
@@ -570,10 +664,10 @@ const CreateObservation = () => {
         <div className="obs-field">
           <label className="obs-label">Immediate Action</label>
           <div className="obs-textarea-container">
-            <textarea 
-               className="obs-textarea"
-               value={formData.immediate_action}
-               onChange={(e) => handleValueChange('immediate_action', e.target.value)}
+            <textarea
+              className="obs-textarea"
+              value={formData.immediate_action}
+              onChange={(e) => handleValueChange('immediate_action', e.target.value)}
             ></textarea>
             <div className="obs-textarea-footer">
               <span className="obs-translate">Translate <ArrowUpFromLine size={12} /></span>
@@ -585,9 +679,9 @@ const CreateObservation = () => {
 
       {/* Footer Disclaimer */}
       <div className={`obs-confirmation ${errors.confirmation ? 'has-error' : ''}`}>
-        <input 
-          type="checkbox" 
-          className="obs-checkbox" 
+        <input
+          type="checkbox"
+          className="obs-checkbox"
           checked={isConfirmed}
           onChange={() => setIsConfirmed(!isConfirmed)}
           style={{ marginTop: '2px' }}
@@ -616,8 +710,8 @@ const CreateObservation = () => {
                   <p className="obs-attachment-name">{attr.file_name}</p>
                   <p className="obs-attachment-desc">{attr.description || 'No description'}</p>
                 </div>
-                <button 
-                  className="obs-remove-attachment" 
+                <button
+                  className="obs-remove-attachment"
                   onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))}
                 >
                   <X size={14} />
@@ -633,9 +727,9 @@ const CreateObservation = () => {
         <button className="obs-btn obs-btn-cancel">CANCEL</button>
         <button className="obs-btn obs-btn-secondary" onClick={() => setIsUploadModalOpen(true)}>UPLOAD</button>
         <button className="obs-btn obs-btn-secondary">DRAFT</button>
-        <button 
-          className="obs-btn obs-btn-primary" 
-          onClick={handleSubmit} 
+        <button
+          className="obs-btn obs-btn-primary"
+          onClick={handleSubmit}
           disabled={submitting}
         >
           {submitting ? 'SUBMITTING...' : 'SUBMIT'}
@@ -643,37 +737,12 @@ const CreateObservation = () => {
       </div>
 
       {/* Upload Modal Implementation */}
-      <UploadModal 
-        isOpen={isUploadModalOpen} 
-        onClose={() => setIsUploadModalOpen(false)} 
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
         onUpload={(newAttr) => setAttachments(prev => [...prev, newAttr])}
         existingAttachments={attachments}
-        onPrefill={(suggestions) => {
-          // Map AI suggestions → formData fields
-          setFormData(prev => ({
-            ...prev,
-            area:                suggestions.area_of_observation  ?? prev.area,
-            sub_area:            suggestions.sub_area             ?? prev.sub_area,
-            business_unit:       suggestions.business_unit        ?? prev.business_unit,
-            department:          suggestions.department           ?? prev.department,
-            designation:         suggestions.designation          ?? prev.designation,
-            operational_activity: suggestions.operational_activity ?? prev.operational_activity,
-            operational_department: suggestions.operational_department ?? prev.operational_department,
-            observation_group:   suggestions.observation_group    ?? prev.observation_group,
-            specific_detail:     suggestions.specific_detail      ?? prev.specific_detail,
-            description:         suggestions.description          ?? prev.description,
-            weather:             suggestions.weather              ?? prev.weather,
-            observation_type:    suggestions.observation_type     ?? prev.observation_type,
-            potential_severity:  suggestions.potential_severity   ?? prev.potential_severity,
-            observation_category: suggestions.observation_category ?? prev.observation_category,
-            hazard_category:     suggestions.hazard_category      ?? prev.hazard_category,
-            risk_category:       suggestions.risk_category        ?? prev.risk_category,
-            immediate_action:    suggestions.immediate_action     ?? prev.immediate_action,
-            time_of_day:         suggestions.time_of_day          ?? prev.time_of_day,
-            shift:               suggestions.shift                ?? prev.shift,
-          }));
-          if (suggestions.near_miss !== undefined) setIsNearMiss(suggestions.near_miss);
-        }}
+        onAIAnalyze={handleAIAnalyze}
       />
 
     </div>
@@ -683,22 +752,18 @@ const CreateObservation = () => {
 /**
  * Enhanced Upload Modal with AI Analysis
  */
-const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill }) => {
+const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onAIAnalyze }) => {
   const [file, setFile] = useState(null);
   const [description, setDescription] = useState('');
   const [preview, setPreview] = useState(null);
   const [type, setType] = useState(null);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analyzeStatus, setAnalyzeStatus] = useState(null); // 'success' | 'error' | null
-  const [analyzeMessage, setAnalyzeMessage] = useState('');
   const fileInputRef = useRef(null);
 
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFile(null); setPreview(null); setType(null);
-      setDescription(''); setAnalyzing(false);
-      setAnalyzeStatus(null); setAnalyzeMessage('');
+      setDescription('');
     }
   }, [isOpen]);
 
@@ -712,7 +777,6 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
     const selectedFiles = Array.from(e.target.files);
     if (!selectedFiles.length) return;
 
-    // Running counts so limits are checked across the batch being added
     let runningTotal = totalCount;
     let runningVideos = videoCount;
     let runningImages = imageCount;
@@ -734,7 +798,6 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
         return;
       }
 
-      // Read and add this file
       const reader = new FileReader();
       reader.onloadend = () => {
         onUpload({
@@ -746,37 +809,19 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
       };
       reader.readAsDataURL(selectedFile);
 
-      // Update running counts
       runningTotal++;
       if (isVideo) runningVideos++;
       if (isImage) runningImages++;
     });
 
-    // Update the label to show how many were picked
-    setFile(selectedFiles[0]); // just for the dropzone label
-    e.target.value = '';        // reset so same files can be re-selected if needed
+    setFile(selectedFiles[0]);
+    e.target.value = '';
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!file) return;
-    setAnalyzing(true);
-    setAnalyzeStatus(null);
-    setAnalyzeMessage('');
-    try {
-      const fd = new FormData();
-      fd.append('files', file);
-      if (description.trim()) fd.append('description', description.trim());
-      const suggestions = await api.analyzeObservation(fd);
-      if (suggestions.error) throw new Error(suggestions.message || suggestions.error);
-      onPrefill(suggestions);
-      // Auto-close modal so the user sees the pre-filled form immediately
-      onClose();
-    } catch (err) {
-      setAnalyzeStatus('error');
-      setAnalyzeMessage(err.message || 'AI analysis failed. Please fill the form manually.');
-    } finally {
-      setAnalyzing(false);
-    }
+    // Delegate to parent — which closes modal & shows overlay
+    onAIAnalyze(file, description);
   };
 
   return (
@@ -834,24 +879,16 @@ const UploadModal = ({ isOpen, onClose, onUpload, existingAttachments, onPrefill
           <div className="modal-char-count">{description.length}/300</div>
         </div>
 
-        {/* AI error banner — only shown on failure */}
-        {analyzeStatus === 'error' && (
-          <div className="ai-status ai-status-error">✗ {analyzeMessage}</div>
-        )}
-
-        {/* Footer: only two buttons */}
+        {/* Footer */}
         <div className="modal-footer">
           <button className="modal-btn modal-btn-cancel" onClick={onClose}>CANCEL</button>
           <button
             className="modal-btn modal-btn-analyze"
             onClick={handleAnalyze}
-            disabled={!file || analyzing}
+            disabled={!file}
             title="Use Gemini AI to auto-fill the form based on this image/video"
           >
-            {analyzing
-              ? <><Loader2 size={14} className="obs-animate-spin" style={{ display:'inline', marginRight: 6 }} />ANALYZING...</>
-              : 'ANALYSE WITH AI'
-            }
+            ANALYSE WITH AI
           </button>
         </div>
       </div>

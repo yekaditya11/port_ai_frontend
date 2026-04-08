@@ -20,6 +20,7 @@ const ObservationListing = () => {
   const [page, setPage] = useState(1);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [enums, setEnums] = useState({});
   
   // Filters
   const [filters, setFilters] = useState({
@@ -32,23 +33,22 @@ const ObservationListing = () => {
   });
 
   // --- API FETCHING ---
-  const fetchObservations = useCallback(async (isLoadMore = false) => {
-    if (isLoadMore) setLoadingMore(true);
+  const fetchObservations = useCallback(async (targetPage = 1, append = false) => {
+    if (append) setLoadingMore(true);
     else setLoading(true);
 
     try {
-      const currentPage = isLoadMore ? page + 1 : 1;
       const params = {
-        page: currentPage,
+        page: targetPage,
         page_size: 10,
         ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '' && v !== 'Select'))
       };
 
       const data = await api.getObservations(params);
       
-      if (isLoadMore) {
+      if (append) {
         setObservations(prev => [...prev, ...data.items]);
-        setPage(currentPage);
+        setPage(targetPage);
       } else {
         setObservations(data.items);
         setTotal(data.total);
@@ -60,14 +60,28 @@ const ObservationListing = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [filters, page]);
+  }, [filters]); // Only recreate if filters change
 
+  // Initial load or filter change -> Fetch observations
   useEffect(() => {
-    fetchObservations();
-  }, [fetchObservations]); // Initial load only
+    fetchObservations(1, false);
+  }, [filters, fetchObservations]);
+
+  // Fetch enums for filters on mount
+  useEffect(() => {
+    const loadEnums = async () => {
+      try {
+        const data = await api.getObservationEnums();
+        setEnums(data);
+      } catch (err) {
+        console.error('Failed to load observation filters:', err);
+      }
+    };
+    loadEnums();
+  }, []);
 
   const handleSearch = () => {
-    fetchObservations(false);
+    fetchObservations(1, false);
   };
 
   const handleFilterChange = (name, value) => {
@@ -121,9 +135,10 @@ const ObservationListing = () => {
             onChange={(e) => handleFilterChange('department', e.target.value)}
           >
             <option value="">Select</option>
-            <option value="HSE">HSE</option>
-            <option value="Operations">Operations</option>
-            <option value="Maintenance">Maintenance</option>
+            {(enums.operational_department || []).map(dept => {
+              const val = typeof dept === 'object' ? (dept.value || dept.name) : dept;
+              return <option key={val} value={val}>{val}</option>;
+            })}
           </select>
           <ChevronDown size={12} className="obs-filter-box-arrow" />
         </div>
@@ -136,14 +151,15 @@ const ObservationListing = () => {
             onChange={(e) => handleFilterChange('operational_activity', e.target.value)}
           >
             <option value="">Select</option>
-            <option value="Driving">Driving</option>
-            <option value="Lifting">Lifting</option>
-            <option value="Working at Height">Working at Height</option>
+            {(enums.operational_activity || []).map(act => {
+              const val = typeof act === 'object' ? (act.name || act.value) : act;
+              return <option key={val} value={val}>{val}</option>;
+            })}
           </select>
           <ChevronDown size={12} className="obs-filter-box-arrow" />
         </div>
 
-        <div className="obs-filter-box">
+        <div className="obs-filter-box" style={{ flex: 1 }}>
           <span className="obs-filter-box-label">Status</span>
           <select 
             className="obs-filter-box-val"
@@ -153,6 +169,8 @@ const ObservationListing = () => {
             <option value="">Select</option>
             <option value="New">New</option>
             <option value="Review">Review</option>
+            <option value="Observation">Observation</option>
+            <option value="Action">Action</option>
             <option value="Closed">Closed</option>
           </select>
           <ChevronDown size={12} className="obs-filter-box-arrow" />
@@ -285,7 +303,7 @@ const ObservationListing = () => {
       {(total > observations.length) && (
         <button 
           className="obs-load-more" 
-          onClick={() => fetchObservations(true)}
+          onClick={() => fetchObservations(page + 1, true)}
           disabled={loadingMore}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
